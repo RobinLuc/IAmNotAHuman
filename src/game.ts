@@ -87,6 +87,19 @@ export function createInitialGameState(locale: Locale): GameState {
   };
 }
 
+export function recordChallengeResult(state: GameState, result: ChallengeResult): GameState {
+  const results = [...state.results, result];
+  const isComplete = results.length >= getChallengeCatalog(state.locale).length;
+
+  return {
+    ...state,
+    phase: isComplete ? "report" : "running",
+    currentChallengeIndex: isComplete ? getChallengeCatalog(state.locale).length - 1 : state.currentChallengeIndex + 1,
+    remainingSeconds: isComplete ? 0 : CHALLENGE_DURATION_SECONDS,
+    results
+  };
+}
+
 export function evaluateChallenge(
   challengeId: ChallengeId,
   rawEvents: ChallengeEvent[],
@@ -217,4 +230,3 @@ function evaluateDenial(rawEvents: ChallengeEvent[], locale: Locale): ChallengeR
     rawEvents
   };
 }
-

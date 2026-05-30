@@ -4,6 +4,7 @@ import {
   createInitialGameState,
   createScoreReport,
   evaluateChallenge,
+  recordChallengeResult,
   getChallengeCatalog,
   getText
 } from "./game";
@@ -28,6 +29,31 @@ describe("game state", () => {
     expect(state.remainingSeconds).toBe(60);
     expect(state.locale).toBe("zh-CN");
     expect(state.results).toEqual([]);
+  });
+
+  it("resets the timer to 60 seconds for each next challenge", () => {
+    const state = createInitialGameState("en");
+    const result = evaluateChallenge("rhythm", [], true, "en");
+
+    const nextState = recordChallengeResult(state, result);
+
+    expect(nextState.phase).toBe("running");
+    expect(nextState.currentChallengeIndex).toBe(1);
+    expect(nextState.remainingSeconds).toBe(60);
+    expect(nextState.results).toHaveLength(1);
+  });
+
+  it("enters the report phase only after all five challenge results are recorded", () => {
+    let state = createInitialGameState("en");
+
+    for (const challenge of getChallengeCatalog("en")) {
+      state = recordChallengeResult(state, evaluateChallenge(challenge.id, [], true, "en"));
+    }
+
+    expect(state.phase).toBe("report");
+    expect(state.currentChallengeIndex).toBe(4);
+    expect(state.remainingSeconds).toBe(0);
+    expect(state.results).toHaveLength(5);
   });
 });
 
@@ -90,4 +116,3 @@ describe("localization", () => {
     expect(getText("zh-CN", "app.title")).toBe("我不是人类");
   });
 });
-
