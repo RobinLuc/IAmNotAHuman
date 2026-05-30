@@ -160,6 +160,7 @@ function renderStart(): void {
 
   document.querySelector("#startButton")?.addEventListener("click", startAudit);
   document.querySelector("#localeButton")?.addEventListener("click", toggleLocale);
+  resetScroll();
 }
 
 function startAudit(): void {
@@ -273,6 +274,7 @@ function renderChallenge(): void {
 
   wireChallenge(challenge);
   document.querySelector("#localeButton")?.addEventListener("click", toggleLocale);
+  resetScroll();
 }
 
 function renderChallengeBody(challenge: Challenge): string {
@@ -499,6 +501,7 @@ function renderReport(): void {
 
   document.querySelector("#restartButton")?.addEventListener("click", startAudit);
   document.querySelector("#localeButton")?.addEventListener("click", toggleLocale);
+  resetScroll();
 }
 
 function updateTimerDisplay(): void {
@@ -546,4 +549,8 @@ function playTone(frequency: number, duration: number, type: OscillatorType): vo
   } catch {
     // Audio feedback is decorative and must never block input.
   }
+}
+
+function resetScroll(): void {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 }
