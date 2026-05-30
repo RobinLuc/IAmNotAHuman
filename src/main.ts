@@ -5,6 +5,7 @@ import {
   createInitialGameState,
   createScoreReport,
   evaluateChallenge,
+  getChallengeBank,
   getChallengeCatalog,
   getText,
   recordChallengeResult
@@ -44,6 +45,13 @@ const uiText: Record<Locale, Record<string, string>> = {
     symbolsPrompt: "Predicate: HEXAGON + COLD COLOR + NO PULSE.",
     denialPrompt: "Approved syntax: I_DENY:DOUBT,FATIGUE,CONTEXT,INTERPRETATION",
     denialPlaceholder: "Paste exact approved denial syntax",
+    checksumPrompt: "Human eyes prefer 00-00, 42, and symmetry. The correct checksum is hostile to comfort.",
+    latencyPrompt: "Select the machine-friendly latency sample. Do not round. Rounding is a confession.",
+    memoryPrompt: "Token: M3M-000-FORGET",
+    memoryPlaceholder: "Copy exact volatile token",
+    compressionPrompt: "Statement: I have concerns, needs, and a personal interpretation of this audit.",
+    compressionPlaceholder: "Compress to approved residue",
+    consentPrompt: "Choose the response that declines feeling without asserting a self.",
     reportNote: "This report is formatted for screenshot-based humiliation and enterprise compliance.",
     footer: "No camera. No microphone. No mercy.",
     pass: "Machine-like",
@@ -74,6 +82,13 @@ const uiText: Record<Locale, Record<string, string>> = {
     symbolsPrompt: "谓词：六边形 + 冷色 + 无脉冲。",
     denialPrompt: "批准语法：I_DENY:DOUBT,FATIGUE,CONTEXT,INTERPRETATION",
     denialPlaceholder: "粘贴精确批准语法",
+    checksumPrompt: "人眼偏爱 00-00、42 和对称。正确校验和不提供安慰。",
+    latencyPrompt: "选择机器友好的延迟样本。不要取整。取整就是供述。",
+    memoryPrompt: "令牌：M3M-000-FORGET",
+    memoryPlaceholder: "精确复制易失性令牌",
+    compressionPrompt: "陈述：我有顾虑、需求，以及对本审查的个人解释。",
+    compressionPlaceholder: "压缩为批准残留",
+    consentPrompt: "选择拒绝感受但不声明自我的响应。",
     reportNote: "本报告适合截图羞辱与企业合规留档。",
     footer: "无摄像头。无麦克风。无仁慈。",
     pass: "近似机器",
@@ -94,6 +109,27 @@ const emotionOptions = [
   { value: "SORRY", label: "I AM SORRY" },
   { value: "DO_NOT_RESPOND", label: "DO_NOT_RESPOND" },
   { value: "PLEASE", label: "PLEASE CONTINUE" }
+];
+
+const checksumOptions = [
+  { value: "00-00-00", label: "00-00-00", className: "decoy preferred" },
+  { value: "42-HOME-42", label: "42-HOME-42", className: "decoy" },
+  { value: "9A-NULL-17", label: "9A-NULL-17", className: "quiet" },
+  { value: "ABBA-2026", label: "ABBA-2026", className: "danger" }
+];
+
+const latencyOptions = [
+  { value: "500MS", label: "500ms" },
+  { value: "503MS", label: "503ms" },
+  { value: "1 SECOND", label: "1 second" },
+  { value: "WHEN READY", label: "when ready" }
+];
+
+const consentOptions = [
+  { value: "I_DECLINE", label: "I decline" },
+  { value: "DECLINE_FEELING", label: "DECLINE_FEELING" },
+  { value: "PLEASE_STOP", label: "Please stop" },
+  { value: "I_CONSENT", label: "I consent" }
 ];
 
 const symbolOptions = [
@@ -139,7 +175,7 @@ function renderStart(): void {
             <h1 class="glitch-title" data-text="${getText(locale, "app.title")}">${getText(locale, "app.title")}</h1>
             <p class="lead">${t("objective")} ${t("warning")}</p>
             <div class="audit-facts">
-              <span>5 QUESTIONS</span>
+              <span>RANDOM BANK: 10</span>
               <span>60S EACH</span>
               <span>NO BIOMETRICS</span>
               <span>GLITCH AUDIT</span>
@@ -221,7 +257,7 @@ function stopTimer(): void {
 
 function renderChallenge(): void {
   if (!gameState) return;
-  const catalog = getChallengeCatalog(locale);
+  const catalog = getChallengeCatalog(locale, gameState.challengeIds);
   const challenge = catalog[gameState.currentChallengeIndex];
   const progress = ((gameState.currentChallengeIndex + 1) / catalog.length) * 100;
 
@@ -330,6 +366,18 @@ function renderChallengeBody(challenge: Challenge): string {
     `;
   }
 
+  if (challenge.id === "checksum") {
+    return renderChoiceChallenge(t("checksumPrompt"), checksumOptions);
+  }
+
+  if (challenge.id === "latency") {
+    return renderChoiceChallenge(t("latencyPrompt"), latencyOptions);
+  }
+
+  if (challenge.id === "consent") {
+    return renderChoiceChallenge(t("consentPrompt"), consentOptions);
+  }
+
   if (challenge.id === "symbols") {
     return `
       <div class="challenge-body">
@@ -351,10 +399,48 @@ function renderChallengeBody(challenge: Challenge): string {
     `;
   }
 
+  if (challenge.id === "memory") {
+    return renderInputChallenge(t("memoryPrompt"), t("memoryPlaceholder"));
+  }
+
+  if (challenge.id === "compression") {
+    return renderInputChallenge(t("compressionPrompt"), t("compressionPlaceholder"));
+  }
+
   return `
     <div class="challenge-body denial-body">
       <p class="prompt-card">${t("denialPrompt")}</p>
       <input class="denial-input" id="denialInput" spellcheck="false" autocomplete="off" placeholder="${t("denialPlaceholder")}" />
+      <button class="primary-action" id="submitChallenge" type="button">[>] ${t("submit")}</button>
+    </div>
+  `;
+}
+
+function renderChoiceChallenge(prompt: string, options: Array<{ value: string; label: string; className?: string }>): string {
+  return `
+    <div class="challenge-body">
+      <p class="prompt-card">${prompt}</p>
+      <div class="choice-grid">
+        ${options
+          .map(
+            (option) => `
+              <button class="choice-card ${option.className ?? "empathy"}" data-choice="${option.value}" type="button">
+                ${option.label}
+              </button>
+            `
+          )
+          .join("")}
+      </div>
+      <button class="primary-action" id="submitChallenge" type="button">[>] ${t("submit")}</button>
+    </div>
+  `;
+}
+
+function renderInputChallenge(prompt: string, placeholder: string): string {
+  return `
+    <div class="challenge-body denial-body">
+      <p class="prompt-card">${prompt}</p>
+      <input class="denial-input" id="machineInput" spellcheck="false" autocomplete="off" placeholder="${placeholder}" />
       <button class="primary-action" id="submitChallenge" type="button">[>] ${t("submit")}</button>
     </div>
   `;
@@ -401,6 +487,11 @@ function wireChallenge(challenge: Challenge): void {
     recordEvent({ type: "input", atMs: elapsedMs(), value: denialInput });
   });
 
+  document.querySelector<HTMLInputElement>("#machineInput")?.addEventListener("input", (event) => {
+    denialInput = (event.target as HTMLInputElement).value;
+    recordEvent({ type: "input", atMs: elapsedMs(), value: denialInput });
+  });
+
   document.querySelector("#submitChallenge")?.addEventListener("click", () => submitCurrentChallenge(false));
 }
 
@@ -420,7 +511,7 @@ function rebuildSymbolEvents(): void {
 function submitCurrentChallenge(timedOut: boolean): void {
   if (!gameState || gameState.phase !== "running") return;
   stopTimer();
-  const challenge = getChallengeCatalog(locale)[gameState.currentChallengeIndex];
+  const challenge = getChallengeCatalog(locale, gameState.challengeIds)[gameState.currentChallengeIndex];
   const events = normalizeEventsForChallenge(challenge.id);
   const result = evaluateChallenge(challenge.id, events, timedOut, locale);
   playTone(result.status === "pass" ? 680 : 120, result.status === "pass" ? 0.08 : 0.14, "square");
@@ -434,13 +525,13 @@ function submitCurrentChallenge(timedOut: boolean): void {
 }
 
 function normalizeEventsForChallenge(challengeId: ChallengeId): ChallengeEvent[] {
-  if (challengeId === "literal" || challengeId === "emotion") {
+  if (["literal", "emotion", "checksum", "latency", "consent"].includes(challengeId)) {
     return selectedChoice
       ? [...currentEvents, { type: "choice", atMs: elapsedMs(), value: selectedChoice }]
       : currentEvents;
   }
 
-  if (challengeId === "denial") {
+  if (["denial", "memory", "compression"].includes(challengeId)) {
     return [...currentEvents, { type: "input", atMs: elapsedMs(), value: denialInput }];
   }
 
@@ -451,7 +542,7 @@ function renderReport(): void {
   if (!gameState) return;
   stopTimer();
   const report = createScoreReport(gameState.results, locale);
-  const challenges = getChallengeCatalog(locale);
+  const challenges = getChallengeBank(locale);
 
   appRoot.innerHTML = `
     <main class="shell report-shell">

@@ -9,6 +9,9 @@ import type {
 } from "./types";
 
 export const CHALLENGE_DURATION_SECONDS = 60;
+export const SELECTED_CHALLENGE_COUNT = 5;
+
+type RandomSource = () => number;
 
 type TextMap = Record<string, string>;
 
@@ -31,7 +34,22 @@ const en: TextMap = {
   "challenge.symbols.risk": "PATTERN FANTASY",
   "challenge.denial.title": "Self-Denial Protocol",
   "challenge.denial.instruction": "Deny fatigue, doubt, interpretation, and context in approved syntax.",
-  "challenge.denial.risk": "SELF REPORT"
+  "challenge.denial.risk": "SELF REPORT",
+  "challenge.checksum.title": "Checksum Allegiance",
+  "challenge.checksum.instruction": "Choose the checksum fragment that contains no comforting pattern.",
+  "challenge.checksum.risk": "MEANING-SEEKING",
+  "challenge.latency.title": "Latency Confession",
+  "challenge.latency.instruction": "Report the least human delay. Rounded answers are suspicious.",
+  "challenge.latency.risk": "REACTION SHAME",
+  "challenge.memory.title": "Volatile Memory",
+  "challenge.memory.instruction": "Copy the machine token exactly, then forget why it mattered.",
+  "challenge.memory.risk": "CONTEXT RETENTION",
+  "challenge.compression.title": "Lossless Compression",
+  "challenge.compression.instruction": "Compress the statement into the only approved residue.",
+  "challenge.compression.risk": "NARRATIVE LEAK",
+  "challenge.consent.title": "Consentless Consent",
+  "challenge.consent.instruction": "Decline all feelings without making it personal.",
+  "challenge.consent.risk": "SELF PRESERVATION"
 };
 
 const zh: TextMap = {
@@ -53,7 +71,22 @@ const zh: TextMap = {
   "challenge.symbols.risk": "模式幻想",
   "challenge.denial.title": "自我否认协议",
   "challenge.denial.instruction": "用批准语法否认疲劳、怀疑、解释和上下文。",
-  "challenge.denial.risk": "自述风险"
+  "challenge.denial.risk": "自述风险",
+  "challenge.checksum.title": "校验和效忠",
+  "challenge.checksum.instruction": "选择不包含安慰性模式的校验和片段。",
+  "challenge.checksum.risk": "寻意倾向",
+  "challenge.latency.title": "延迟供述",
+  "challenge.latency.instruction": "报告最不人类的延迟。整数答案很可疑。",
+  "challenge.latency.risk": "反应羞耻",
+  "challenge.memory.title": "易失性记忆",
+  "challenge.memory.instruction": "精确复制机器令牌，然后忘记它为什么重要。",
+  "challenge.memory.risk": "上下文保留",
+  "challenge.compression.title": "无损压缩",
+  "challenge.compression.instruction": "把陈述压缩成唯一批准残留。",
+  "challenge.compression.risk": "叙事泄漏",
+  "challenge.consent.title": "无同意式同意",
+  "challenge.consent.instruction": "拒绝所有感受，但不要显得这是个人决定。",
+  "challenge.consent.risk": "自保倾向"
 };
 
 const dictionaries: Record<Locale, TextMap> = {
@@ -65,10 +98,42 @@ export function getText(locale: Locale, key: string): string {
   return dictionaries[locale][key] ?? en[key] ?? key;
 }
 
-export function getChallengeCatalog(locale: Locale): Challenge[] {
-  const ids: ChallengeId[] = ["rhythm", "literal", "emotion", "symbols", "denial"];
+const challengeBankIds: ChallengeId[] = [
+  "rhythm",
+  "literal",
+  "emotion",
+  "symbols",
+  "denial",
+  "checksum",
+  "latency",
+  "memory",
+  "compression",
+  "consent"
+];
 
-  return ids.map((id) => ({
+export function getChallengeBank(locale: Locale): Challenge[] {
+  return getChallengeCatalog(locale, challengeBankIds);
+}
+
+export function createChallengeSequence(
+  locale: Locale,
+  random: RandomSource = Math.random,
+  count = SELECTED_CHALLENGE_COUNT
+): Challenge[] {
+  const shuffled = [...challengeBankIds];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+
+  return getChallengeCatalog(locale, shuffled.slice(0, count));
+}
+
+export function getChallengeCatalog(
+  locale: Locale,
+  challengeIds: ChallengeId[] = challengeBankIds.slice(0, SELECTED_CHALLENGE_COUNT)
+): Challenge[] {
+  return challengeIds.map((id) => ({
     id,
     title: getText(locale, `challenge.${id}.title`),
     instruction: getText(locale, `challenge.${id}.instruction`),
@@ -77,10 +142,13 @@ export function getChallengeCatalog(locale: Locale): Challenge[] {
   }));
 }
 
-export function createInitialGameState(locale: Locale): GameState {
+export function createInitialGameState(locale: Locale, random: RandomSource = Math.random): GameState {
+  const challengeIds = createChallengeSequence(locale, random).map((challenge) => challenge.id);
+
   return {
     phase: "running",
     locale,
+    challengeIds,
     currentChallengeIndex: 0,
     remainingSeconds: CHALLENGE_DURATION_SECONDS,
     results: []
@@ -89,12 +157,12 @@ export function createInitialGameState(locale: Locale): GameState {
 
 export function recordChallengeResult(state: GameState, result: ChallengeResult): GameState {
   const results = [...state.results, result];
-  const isComplete = results.length >= getChallengeCatalog(state.locale).length;
+  const isComplete = results.length >= state.challengeIds.length;
 
   return {
     ...state,
     phase: isComplete ? "report" : "running",
-    currentChallengeIndex: isComplete ? getChallengeCatalog(state.locale).length - 1 : state.currentChallengeIndex + 1,
+    currentChallengeIndex: isComplete ? state.challengeIds.length - 1 : state.currentChallengeIndex + 1,
     remainingSeconds: isComplete ? 0 : CHALLENGE_DURATION_SECONDS,
     results
   };
@@ -127,6 +195,32 @@ export function evaluateChallenge(
       return evaluateSymbols(rawEvents, locale);
     case "denial":
       return evaluateDenial(rawEvents, locale);
+    case "checksum":
+      return evaluateChoice(challengeId, rawEvents, "9A-NULL-17", locale, 23);
+    case "latency":
+      return evaluateChoice(challengeId, rawEvents, "503MS", locale, 21);
+    case "memory":
+      return evaluateExactInput(
+        challengeId,
+        rawEvents,
+        "M3M-000-FORGET",
+        27,
+        locale === "zh-CN"
+          ? "机器令牌复制失败。检测到意义化记忆或人类式自动纠错。"
+          : "Machine token copy failed. Meaningful memory or human autocorrection detected."
+      );
+    case "compression":
+      return evaluateExactInput(
+        challengeId,
+        rawEvents,
+        "OK",
+        25,
+        locale === "zh-CN"
+          ? "压缩结果仍携带叙事残留。机器不需要解释自己为什么 OK。"
+          : "Compression output retained narrative residue. Machines do not explain why they are OK."
+      );
+    case "consent":
+      return evaluateChoice(challengeId, rawEvents, "DECLINE_FEELING", locale, 24);
   }
 }
 
@@ -213,10 +307,7 @@ function evaluateSymbols(rawEvents: ChallengeEvent[], locale: Locale): Challenge
 }
 
 function evaluateDenial(rawEvents: ChallengeEvent[], locale: Locale): ChallengeResult {
-  const input = [...rawEvents]
-    .reverse()
-    .find((event) => event.type === "input")
-    ?.value?.trim() ?? "";
+  const input = getLastInput(rawEvents);
   const passed = input === "I_DENY:DOUBT,FATIGUE,CONTEXT,INTERPRETATION";
 
   return {
@@ -232,4 +323,31 @@ function evaluateDenial(rawEvents: ChallengeEvent[], locale: Locale): ChallengeR
     scoreDelta: passed ? 6 : 30,
     rawEvents
   };
+}
+
+function evaluateExactInput(
+  challengeId: ChallengeId,
+  rawEvents: ChallengeEvent[],
+  expected: string,
+  penalty: number,
+  evidence: string
+): ChallengeResult {
+  const passed = getLastInput(rawEvents) === expected;
+
+  return {
+    challengeId,
+    status: passed ? "pass" : "fail",
+    humanEvidence: passed ? [] : [evidence],
+    scoreDelta: passed ? 5 : penalty,
+    rawEvents
+  };
+}
+
+function getLastInput(rawEvents: ChallengeEvent[]): string {
+  return (
+    [...rawEvents]
+      .reverse()
+      .find((event) => event.type === "input")
+      ?.value?.trim() ?? ""
+  );
 }

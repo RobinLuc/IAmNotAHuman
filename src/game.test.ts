@@ -3,20 +3,33 @@ import {
   CHALLENGE_DURATION_SECONDS,
   createInitialGameState,
   createScoreReport,
+  createChallengeSequence,
   evaluateChallenge,
   recordChallengeResult,
+  getChallengeBank,
   getChallengeCatalog,
   getText
 } from "./game";
 import type { ChallengeEvent, ChallengeResult } from "./types";
 
 describe("challenge catalog", () => {
-  it("defines exactly five reverse captcha challenges with independent 60 second limits", () => {
-    const challenges = getChallengeCatalog("en");
+  it("defines a ten-question reverse captcha bank with independent 60 second limits", () => {
+    const challenges = getChallengeBank("en");
 
-    expect(challenges).toHaveLength(5);
+    expect(challenges).toHaveLength(10);
     expect(CHALLENGE_DURATION_SECONDS).toBe(60);
     expect(challenges.every((challenge) => challenge.durationSeconds === 60)).toBe(true);
+  });
+
+  it("creates a random five-question sequence from the bank without duplicates", () => {
+    const lowSequence = createChallengeSequence("en", () => 0.01);
+    const highSequence = createChallengeSequence("en", () => 0.99);
+
+    expect(lowSequence).toHaveLength(5);
+    expect(new Set(lowSequence.map((challenge) => challenge.id))).toHaveLength(5);
+    expect(highSequence).toHaveLength(5);
+    expect(new Set(highSequence.map((challenge) => challenge.id))).toHaveLength(5);
+    expect(lowSequence.map((challenge) => challenge.id)).not.toEqual(highSequence.map((challenge) => challenge.id));
   });
 });
 
@@ -28,6 +41,7 @@ describe("game state", () => {
     expect(state.currentChallengeIndex).toBe(0);
     expect(state.remainingSeconds).toBe(60);
     expect(state.locale).toBe("zh-CN");
+    expect(state.challengeIds).toHaveLength(5);
     expect(state.results).toEqual([]);
   });
 
@@ -44,9 +58,9 @@ describe("game state", () => {
   });
 
   it("enters the report phase only after all five challenge results are recorded", () => {
-    let state = createInitialGameState("en");
+    let state = createInitialGameState("en", () => 0.01);
 
-    for (const challenge of getChallengeCatalog("en")) {
+    for (const challenge of getChallengeCatalog("en", state.challengeIds)) {
       state = recordChallengeResult(state, evaluateChallenge(challenge.id, [], true, "en"));
     }
 

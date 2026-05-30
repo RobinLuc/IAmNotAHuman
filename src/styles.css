@@ -476,11 +476,13 @@ footer {
 }
 
 .probability-ring {
+  width: min(220px, 100%);
   aspect-ratio: 1;
   border: 2px solid #ff3b5f;
   display: grid;
   place-items: center;
   text-align: center;
+  justify-self: end;
   background: repeating-linear-gradient(0deg, rgba(255, 59, 95, 0.14) 0 2px, transparent 2px 9px);
 }
 
@@ -583,6 +585,10 @@ footer {
   .report-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .probability-ring {
+    justify-self: start;
+  }
 }
 
 @media (max-width: 560px) {
@@ -632,4 +638,3 @@ footer {
     width: 190px;
   }
 }
-

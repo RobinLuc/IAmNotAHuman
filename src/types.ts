@@ -2,7 +2,17 @@ export type Locale = "en" | "zh-CN";
 
 export type GamePhase = "idle" | "running" | "report";
 
-export type ChallengeId = "rhythm" | "literal" | "emotion" | "symbols" | "denial";
+export type ChallengeId =
+  | "rhythm"
+  | "literal"
+  | "emotion"
+  | "symbols"
+  | "denial"
+  | "checksum"
+  | "latency"
+  | "memory"
+  | "compression"
+  | "consent";
 
 export type ChallengeStatus = "pass" | "fail" | "timeout";
 
@@ -33,6 +43,7 @@ export interface ChallengeResult {
 export interface GameState {
   phase: GamePhase;
   locale: Locale;
+  challengeIds: ChallengeId[];
   currentChallengeIndex: number;
   remainingSeconds: number;
   results: ChallengeResult[];
@@ -44,4 +55,3 @@ export interface ScoreReport {
   evidence: string[];
   challengeResults: ChallengeResult[];
 }
-
