@@ -39,6 +39,8 @@ const appRoot = app;
 
 const uiText: Record<Locale, Record<string, string>> = {
   en: {
+    startTitle: "I Am Not A Human",
+    startLead: "Objective: prove the applicant is not human. Human convenience features are disabled.",
     start: "Start audit",
     restart: "Re-run audit",
     submit: "Submit sample",
@@ -106,6 +108,8 @@ const uiText: Record<Locale, Record<string, string>> = {
     timeout: "Organic timeout"
   },
   "zh-CN": {
+    startTitle: "机人验证：证明你不是人类！",
+    startLead: "",
     start: "开始审查",
     restart: "再审一次",
     submit: "提交",
@@ -298,6 +302,8 @@ function renderStart(): void {
   stopTimer();
   gameState = null;
   currentEvents = [];
+  const startLead = t("startLead");
+  const startTitle = t("startTitle");
   appRoot.innerHTML = `
     <main class="shell start-shell">
       <section class="hero-panel">
@@ -309,8 +315,8 @@ function renderStart(): void {
         <div class="hero-grid">
           <div class="hero-copy">
             <p class="eyebrow">Reverse Human Verification</p>
-            <h1 class="glitch-title" data-text="${getText(locale, "app.title")}">${getText(locale, "app.title")}</h1>
-            <p class="lead">${t("objective")} ${t("warning")}</p>
+            <h1 class="glitch-title" data-text="${startTitle}">${startTitle}</h1>
+            ${startLead ? `<p class="lead">${startLead}</p>` : ""}
             <div class="audit-facts">
               <span>BANK: 20 / RUN: 10</span>
               <span>60S EACH</span>

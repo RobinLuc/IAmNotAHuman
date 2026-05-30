@@ -14,43 +14,43 @@ export interface SoundNote {
 
 const soundCues: Record<SoundCue, SoundNote[]> = {
   start: [
-    { frequency: 196, durationMs: 70, delayMs: 0, type: "square", gain: 0.046 },
-    { frequency: 294, durationMs: 70, delayMs: 70, type: "square", gain: 0.044 },
-    { frequency: 392, durationMs: 110, delayMs: 140, type: "sawtooth", gain: 0.038 }
+    { frequency: 196, durationMs: 70, delayMs: 0, type: "square", gain: 0.092 },
+    { frequency: 294, durationMs: 70, delayMs: 70, type: "square", gain: 0.088 },
+    { frequency: 392, durationMs: 110, delayMs: 140, type: "sawtooth", gain: 0.076 }
   ],
   tap: [
-    { frequency: 520, durationMs: 28, delayMs: 0, type: "square", gain: 0.032 },
-    { frequency: 760, durationMs: 22, delayMs: 30, type: "square", gain: 0.026 }
+    { frequency: 520, durationMs: 28, delayMs: 0, type: "square", gain: 0.064 },
+    { frequency: 760, durationMs: 22, delayMs: 30, type: "square", gain: 0.052 }
   ],
   select: [
-    { frequency: 360, durationMs: 45, delayMs: 0, type: "triangle", gain: 0.035 },
-    { frequency: 245, durationMs: 35, delayMs: 48, type: "sawtooth", gain: 0.024 }
+    { frequency: 360, durationMs: 45, delayMs: 0, type: "triangle", gain: 0.07 },
+    { frequency: 245, durationMs: 35, delayMs: 48, type: "sawtooth", gain: 0.048 }
   ],
   symbol: [
-    { frequency: 280, durationMs: 35, delayMs: 0, type: "triangle", gain: 0.032 },
-    { frequency: 430, durationMs: 45, delayMs: 38, type: "triangle", gain: 0.03 }
+    { frequency: 280, durationMs: 35, delayMs: 0, type: "triangle", gain: 0.064 },
+    { frequency: 430, durationMs: 45, delayMs: 38, type: "triangle", gain: 0.06 }
   ],
   type: [
-    { frequency: 700, durationMs: 16, delayMs: 0, type: "square", gain: 0.022 },
-    { frequency: 520, durationMs: 14, delayMs: 18, type: "square", gain: 0.018 }
+    { frequency: 700, durationMs: 16, delayMs: 0, type: "square", gain: 0.044 },
+    { frequency: 520, durationMs: 14, delayMs: 18, type: "square", gain: 0.036 }
   ],
   pass: [
-    { frequency: 520, durationMs: 65, delayMs: 0, type: "triangle", gain: 0.04 },
-    { frequency: 780, durationMs: 75, delayMs: 68, type: "triangle", gain: 0.043 },
-    { frequency: 1040, durationMs: 110, delayMs: 146, type: "square", gain: 0.036 }
+    { frequency: 520, durationMs: 65, delayMs: 0, type: "triangle", gain: 0.08 },
+    { frequency: 780, durationMs: 75, delayMs: 68, type: "triangle", gain: 0.086 },
+    { frequency: 1040, durationMs: 110, delayMs: 146, type: "square", gain: 0.072 }
   ],
   fail: [
-    { frequency: 180, durationMs: 90, delayMs: 0, type: "sawtooth", gain: 0.045 },
-    { frequency: 118, durationMs: 140, delayMs: 86, type: "square", gain: 0.035 }
+    { frequency: 180, durationMs: 90, delayMs: 0, type: "sawtooth", gain: 0.09 },
+    { frequency: 118, durationMs: 140, delayMs: 86, type: "square", gain: 0.07 }
   ],
   timeout: [
-    { frequency: 110, durationMs: 130, delayMs: 0, type: "sawtooth", gain: 0.04 },
-    { frequency: 76, durationMs: 210, delayMs: 132, type: "square", gain: 0.032 }
+    { frequency: 110, durationMs: 130, delayMs: 0, type: "sawtooth", gain: 0.08 },
+    { frequency: 76, durationMs: 210, delayMs: 132, type: "square", gain: 0.064 }
   ],
   leaderboard: [
-    { frequency: 420, durationMs: 50, delayMs: 0, type: "triangle", gain: 0.034 },
-    { frequency: 560, durationMs: 50, delayMs: 55, type: "triangle", gain: 0.036 },
-    { frequency: 720, durationMs: 90, delayMs: 112, type: "triangle", gain: 0.032 }
+    { frequency: 420, durationMs: 50, delayMs: 0, type: "triangle", gain: 0.068 },
+    { frequency: 560, durationMs: 50, delayMs: 55, type: "triangle", gain: 0.072 },
+    { frequency: 720, durationMs: 90, delayMs: 112, type: "triangle", gain: 0.064 }
   ]
 };
 

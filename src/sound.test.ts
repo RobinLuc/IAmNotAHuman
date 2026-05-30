@@ -29,11 +29,11 @@ describe("sound cues", () => {
     }
   });
 
-  it("uses phone-audible gain levels", () => {
+  it("uses doubled phone-audible gain levels", () => {
     const cues = ["start", "tap", "select", "symbol", "type", "pass", "fail", "timeout", "leaderboard"] as const;
     const peaks = cues.flatMap((cue) => getSoundCueNotes(cue).map((note) => note.gain ?? 0));
 
-    expect(Math.min(...peaks)).toBeGreaterThanOrEqual(0.018);
-    expect(Math.max(...peaks)).toBeLessThanOrEqual(0.075);
+    expect(Math.min(...peaks)).toBeGreaterThanOrEqual(0.036);
+    expect(Math.max(...peaks)).toBeLessThanOrEqual(0.15);
   });
 });
