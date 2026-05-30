@@ -357,6 +357,7 @@ button {
   background: rgba(255, 255, 255, 0.04);
   margin: 0;
   padding: 14px 16px;
+  overflow-wrap: anywhere;
 }
 
 .corrupted {
@@ -700,25 +701,44 @@ footer {
     gap: 10px;
   }
 
-  .side-panel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .challenge-panel {
+    min-height: auto;
+    order: 1;
   }
 
-  .panel-label,
-  .progress-rail,
-  .risk-tag,
+  .side-panel {
+    order: 2;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .side-panel .panel-label,
   .side-copy {
+    display: none;
+  }
+
+  .metric {
+    border: 1px solid rgba(248, 245, 239, 0.12);
+    padding: 10px;
+  }
+
+  .metric strong {
+    font-size: 24px;
+  }
+
+  .progress-rail,
+  .risk-tag {
     grid-column: 1 / -1;
+  }
+
+  .progress-rail {
+    margin: 4px 0;
   }
 
   .log-panel {
     order: 3;
-  }
-
-  .challenge-panel {
-    min-height: auto;
   }
 
   .report-grid {
@@ -743,7 +763,7 @@ footer {
 @media (max-width: 560px) {
   .shell {
     width: min(100vw - 16px, 420px);
-    padding: 8px 0;
+    padding: 6px 0 calc(92px + env(safe-area-inset-bottom));
   }
 
   .system-strip,
@@ -769,10 +789,63 @@ footer {
 
   .topbar {
     align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .topbar .eyebrow {
+    font-size: 10px;
+  }
+
+  .page-title {
+    font-size: clamp(36px, 14vw, 52px);
   }
 
   .side-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .challenge-panel {
+    padding: 14px;
+  }
+
+  .challenge-header {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .challenge-header h2 {
+    font-size: clamp(30px, 11vw, 48px);
+  }
+
+  .status-pill {
+    min-height: 38px;
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .instruction {
+    margin: 0 0 12px;
+  }
+
+  .challenge-body {
+    gap: 12px;
+    padding-bottom: 88px;
+  }
+
+  .challenge-body > .primary-action {
+    position: sticky;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 5;
+    width: 100%;
+    min-height: 52px;
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .prompt-card {
+    padding: 12px;
   }
 
   .choice-card {

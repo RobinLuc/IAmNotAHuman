@@ -17,6 +17,7 @@ import {
   submitScore,
   sumElapsedMs
 } from "./leaderboard";
+import { createSoundPlayer, DEFAULT_LOCALE } from "./sound";
 import type {
   Challenge,
   ChallengeEvent,
@@ -273,7 +274,9 @@ const symbolOptions = [
   { value: "tri-cold", label: "TRI-12", shape: "triangle", tone: "cold", pulse: false }
 ];
 
-let locale: Locale = "en";
+const soundPlayer = createSoundPlayer();
+
+let locale: Locale = DEFAULT_LOCALE;
 let gameState: GameState | null = null;
 let currentEvents: ChallengeEvent[] = [];
 let startedAt = 0;
@@ -281,7 +284,6 @@ let timer: number | undefined;
 let selectedChoice = "";
 let selectedSymbols = new Set<string>();
 let denialInput = "";
-let audioContext: AudioContext | null = null;
 let currentRunId = createRunId();
 let leaderboardEntries: LeaderboardEntry[] = [];
 let leaderboardSubmissionState: LeaderboardSubmissionState = { status: "idle" };
@@ -335,7 +337,7 @@ function renderStart(): void {
 }
 
 function startAudit(): void {
-  playTone(220, 0.08, "square");
+  soundPlayer.play("start");
   currentRunId = createRunId();
   leaderboardEntries = [];
   leaderboardSubmissionState = { status: "idle" };
@@ -344,6 +346,7 @@ function startAudit(): void {
 }
 
 function toggleLocale(): void {
+  soundPlayer.play("select");
   locale = locale === "en" ? "zh-CN" : "en";
   if (!gameState) {
     renderStart();
@@ -631,7 +634,7 @@ function wireChallenge(challenge: Challenge): void {
       const taps = currentEvents.filter((event) => event.type === "tap").length;
       const tapCount = document.querySelector("#tapCount");
       if (tapCount) tapCount.textContent = `${Math.min(taps, 5)}/5`;
-      playTone(500 + taps * 30, 0.04, "square");
+      soundPlayer.play("tap");
     });
   }
 
@@ -641,7 +644,7 @@ function wireChallenge(challenge: Challenge): void {
       document.querySelectorAll("[data-choice]").forEach((node) => node.classList.remove("selected"));
       button.classList.add("selected");
       recordEvent({ type: "choice", atMs: elapsedMs(), value: selectedChoice });
-      playTone(selectedChoice === "DO_NOT_RESPOND" || selectedChoice === "BLUE" ? 360 : 160, 0.05, "sawtooth");
+      soundPlayer.play("select");
     });
   });
 
@@ -656,18 +659,20 @@ function wireChallenge(challenge: Challenge): void {
         button.classList.add("selected");
       }
       rebuildSymbolEvents();
-      playTone(280 + selectedSymbols.size * 70, 0.05, "triangle");
+      soundPlayer.play("symbol");
     });
   });
 
   document.querySelector<HTMLInputElement>("#denialInput")?.addEventListener("input", (event) => {
     denialInput = (event.target as HTMLInputElement).value;
     recordEvent({ type: "input", atMs: elapsedMs(), value: denialInput });
+    soundPlayer.play("type");
   });
 
   document.querySelector<HTMLInputElement>("#machineInput")?.addEventListener("input", (event) => {
     denialInput = (event.target as HTMLInputElement).value;
     recordEvent({ type: "input", atMs: elapsedMs(), value: denialInput });
+    soundPlayer.play("type");
   });
 
   document.querySelector("#submitChallenge")?.addEventListener("click", () => submitCurrentChallenge(false));
@@ -694,7 +699,7 @@ function submitCurrentChallenge(timedOut: boolean): void {
   const submitEvent: ChallengeEvent = { type: "submit", atMs: elapsedMs(), value: challenge.id };
   const events = timedOut ? normalizedEvents : [...normalizedEvents, submitEvent];
   const result = evaluateChallenge(challenge.id, events, timedOut, locale);
-  playTone(result.status === "pass" ? 680 : 120, result.status === "pass" ? 0.08 : 0.14, "square");
+  soundPlayer.play(result.status);
   gameState = recordChallengeResult(gameState, result);
 
   if (gameState.phase === "report") {
@@ -904,6 +909,7 @@ async function handleLeaderboardSubmit(report: ScoreReport): Promise<void> {
   const nickname = sanitizeNickname(input?.value ?? "");
 
   if (nickname.length < 2) {
+    soundPlayer.play("fail");
     leaderboardSubmissionState = {
       status: "error",
       message: locale === "zh-CN" ? "昵称至少 2 个字。" : "Nickname needs at least 2 characters."
@@ -925,6 +931,7 @@ async function handleLeaderboardSubmit(report: ScoreReport): Promise<void> {
   });
 
   leaderboardSubmissionState = await submitScore(payload);
+  soundPlayer.play(leaderboardSubmissionState.status === "submitted" ? "leaderboard" : "fail");
   await refreshLeaderboard(report, false);
   updateLeaderboardPanel(report);
 }
@@ -993,23 +1000,6 @@ function renderEventLog(): string {
 
 function elapsedMs(): number {
   return Math.max(0, Math.round(performance.now() - startedAt));
-}
-
-function playTone(frequency: number, duration: number, type: OscillatorType): void {
-  try {
-    audioContext ??= new AudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-    gain.gain.value = 0.018;
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
-  } catch {
-    // Audio feedback is decorative and must never block input.
-  }
 }
 
 function resetScroll(): void {
