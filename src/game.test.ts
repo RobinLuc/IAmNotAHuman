@@ -172,6 +172,22 @@ describe("score report", () => {
     expect(report.humanProbability).toBe(92);
     expect(report.humanProbability).toBeLessThan(99);
   });
+
+  it("localizes stored challenge evidence when the report locale changes", () => {
+    const englishResult = evaluateChallenge(
+      "precision",
+      [{ type: "choice", atMs: 800, value: "0.3" }],
+      false,
+      "en"
+    );
+
+    const report = createScoreReport([englishResult], "zh-CN");
+
+    expect(englishResult.humanEvidence[0]).toContain("Rounded answer");
+    expect(report.evidence[0]).toContain("顺眼取整");
+    expect(report.challengeResults[0].humanEvidence[0]).toContain("顺眼取整");
+    expect(report.evidence.join(" ")).not.toContain("Rounded answer");
+  });
 });
 
 describe("localization", () => {

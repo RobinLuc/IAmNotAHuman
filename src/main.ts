@@ -62,7 +62,7 @@ const uiText: Record<Locale, Record<string, string>> = {
     leaderboardSubmit: "Submit score",
     leaderboardSubmitting: "Uploading evidence...",
     leaderboardSubmitted: "Score accepted. The system is briefly impressed.",
-    leaderboardUnconfigured: "Leaderboard needs Supabase keys. This report is still valid.",
+    leaderboardUnconfigured: "Leaderboard is not configured: missing Supabase URL / anon key. This report is still valid.",
     leaderboardError: "Leaderboard failed. This report is still valid.",
     leaderboardEmpty: "Nobody has proved they are unlike a person yet.",
     leaderboardTime: "time",
@@ -96,6 +96,9 @@ const uiText: Record<Locale, Record<string, string>> = {
     timezonePrompt: "00:00Z + 90 minutes =",
     silencePrompt: "Pick the response that refuses to participate without sounding hurt.",
     reportNote: "This report is formatted for screenshot-based humiliation and enterprise compliance.",
+    noEvidenceCard: "No obvious human residue. Suspicious.",
+    noEvidenceList: "No evidence. This is also evidence.",
+    leaderboardEyebrow: "PUBLIC NON-HUMAN INDEX",
     footer: "No camera. No microphone. No mercy.",
     pass: "Machine-like",
     fail: "Human evidence",
@@ -126,7 +129,7 @@ const uiText: Record<Locale, Record<string, string>> = {
     leaderboardSubmit: "提交成绩",
     leaderboardSubmitting: "正在上传人味残留...",
     leaderboardSubmitted: "已入库。系统短暂承认你不像人。",
-    leaderboardUnconfigured: "排行榜还没接上 Supabase。本局报告照样有效。",
+    leaderboardUnconfigured: "排行榜未配置：缺少 Supabase URL / anon key。本局报告照样有效。",
     leaderboardError: "排行榜提交失败，不影响本局报告。",
     leaderboardEmpty: "还没人证明自己不像人。",
     leaderboardTime: "用时",
@@ -160,6 +163,9 @@ const uiText: Record<Locale, Record<string, string>> = {
     timezonePrompt: "00:00Z + 90 分钟 =",
     silencePrompt: "选一个不参与、但也不像受伤了的回应。",
     reportNote: "适合截图，也适合被系统冷冰冰地羞辱。",
+    noEvidenceCard: "没有明显人味。可疑。",
+    noEvidenceList: "没有证据。这本身也算证据。",
+    leaderboardEyebrow: "公开非人指数",
     footer: "不用摄像头，不用麦克风，只看你露不露馅。",
     pass: "暂未露馅",
     fail: "人类证据",
@@ -759,7 +765,7 @@ function renderReport(): void {
                     <b>${result.status === "pass" ? t("pass") : result.status === "timeout" ? t("timeout") : t("fail")}</b>
                   </div>
                   <h3>${challenge?.title ?? result.challengeId}</h3>
-                  <p>${result.humanEvidence[0] ?? "No obvious human residue. Suspicious."}</p>
+                  <p>${result.humanEvidence[0] ?? t("noEvidenceCard")}</p>
                 </article>
               `;
             })
@@ -768,7 +774,7 @@ function renderReport(): void {
         <div class="evidence-panel">
           <h2>${t("evidence")}</h2>
           <ul>
-            ${report.evidence.map((item) => `<li>${item}</li>`).join("") || "<li>No evidence. This is also evidence.</li>"}
+            ${report.evidence.map((item) => `<li>${item}</li>`).join("") || `<li>${t("noEvidenceList")}</li>`}
           </ul>
           <p>${t("reportNote")}</p>
         </div>
@@ -801,7 +807,7 @@ function renderLeaderboardPanel(report: ScoreReport): string {
     <section class="leaderboard-panel" id="leaderboardPanel" aria-live="polite">
       <div class="leaderboard-header">
         <div>
-          <p class="eyebrow">PUBLIC NON-HUMAN INDEX</p>
+          <p class="eyebrow">${t("leaderboardEyebrow")}</p>
           <h2>${t("leaderboardTitle")}</h2>
           <p>${t("leaderboardDek")}</p>
         </div>

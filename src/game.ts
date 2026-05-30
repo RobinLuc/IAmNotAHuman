@@ -374,15 +374,100 @@ export function createScoreReport(results: ChallengeResult[], locale: Locale): S
   const maximumEvidence = Math.max(results.length * 30, 1);
   const evidenceRatio = Math.max(0, Math.min(1, score / maximumEvidence));
   const humanProbability = Math.round(28 + evidenceRatio * 64);
-  const evidence = results.flatMap((result) => result.humanEvidence);
+  const challengeResults = results.map((result) => ({
+    ...result,
+    humanEvidence: getLocalizedEvidence(result, locale)
+  }));
+  const evidence = challengeResults.flatMap((result) => result.humanEvidence);
   const verdictKey = humanProbability >= 65 ? "verdict.human" : "verdict.pending";
 
   return {
     humanProbability,
     verdict: getText(locale, verdictKey),
     evidence,
-    challengeResults: results
+    challengeResults
   };
+}
+
+function getLocalizedEvidence(result: ChallengeResult, locale: Locale): string[] {
+  if (result.status === "pass") {
+    return [];
+  }
+
+  if (result.status === "timeout") {
+    return [getText(locale, "evidence.timeout")];
+  }
+
+  return [getChallengeFailureEvidence(result.challengeId, locale)];
+}
+
+function getChallengeFailureEvidence(challengeId: ChallengeId, locale: Locale): string {
+  switch (challengeId) {
+    case "rhythm":
+      return locale === "zh-CN"
+        ? "点击节奏抖得太像手指。机器不欣赏这种细腻。"
+        : "Tap variance exceeded machine tolerance. Your timing contains finger-shaped noise.";
+    case "literal":
+    case "emotion":
+    case "checksum":
+    case "latency":
+    case "consent":
+      return locale === "zh-CN"
+        ? "你相信了界面暗示，没有相信字面规则。很人类。"
+        : "Selection log shows trust in interface emphasis instead of literal instruction.";
+    case "symbols":
+      return locale === "zh-CN"
+        ? "你的选择里有直觉分组。机器不承认“看起来像”。"
+        : "Symbol selection included intuitive grouping. Machine predicates do not honor aesthetic coherence.";
+    case "denial":
+      return locale === "zh-CN"
+        ? "自我否认格式不稳。解释欲和自然语言都漏出来了。"
+        : "Self-denial syntax unstable. Interpretation desire, context dependence, or natural language residue detected.";
+    case "memory":
+      return locale === "zh-CN"
+        ? "令牌没抄准。你把它读顺了，这很危险。"
+        : "Machine token copy failed. Meaningful memory or human autocorrection detected.";
+    case "compression":
+      return locale === "zh-CN"
+        ? "压缩后还剩解释。机器只需要 OK，不需要心路历程。"
+        : "Compression output retained narrative residue. Machines do not explain why they are OK.";
+    case "entropy":
+      return locale === "zh-CN"
+        ? "熵值样本不合格。你选了更像有故事的东西。"
+        : "Entropy sample rejected. You reached for a token with narrative warmth.";
+    case "precision":
+      return locale === "zh-CN"
+        ? "检测到顺眼取整。机器看到你把数字修得像人能接受。"
+        : "Rounded answer detected. The machine saw you make the number look nice.";
+    case "priority":
+      return locale === "zh-CN"
+        ? "你跟着界面的恐慌升级了优先级，没有按状态码办事。"
+        : "Priority escalation followed visual panic rather than status code semantics.";
+    case "mirror":
+      return locale === "zh-CN"
+        ? "镜像令牌被修正成了可读文本。意义修复是人类残留。"
+        : "Mirror token was repaired into readable language. Meaning repair is human residue.";
+    case "parity":
+      return locale === "zh-CN"
+        ? "布尔奇偶失败。你把社交解释带进了真值表。"
+        : "Boolean parity failed. Social interpretation leaked into a truth table.";
+    case "nullish":
+      return locale === "zh-CN"
+        ? "null 被你软化成了缺席或安慰。机器不会替空值找台阶。"
+        : "Null was softened into absence or comfort. Machines leave null alone.";
+    case "schema":
+      return locale === "zh-CN"
+        ? "JSON 结构不稳。你给格式添了多余的人情味。"
+        : "JSON schema drifted. Extra whitespace, comments, or apology residue detected.";
+    case "sorting":
+      return locale === "zh-CN"
+        ? "数字习惯覆盖了字典序。你太会按人类直觉排队了。"
+        : "Numeric habit overrode lexicographic sorting.";
+    case "timezone":
+      return locale === "zh-CN" ? "UTC 答案漂向了本地舒适区。" : "UTC answer drifted toward local comfort.";
+    case "silence":
+      return locale === "zh-CN" ? "非回应失败。系统捕捉到互动反射。" : "Non-response failed. Engagement reflex detected.";
+  }
 }
 
 function evaluateRhythm(rawEvents: ChallengeEvent[], locale: Locale): ChallengeResult {
