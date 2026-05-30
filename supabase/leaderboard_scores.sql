@@ -35,7 +35,17 @@ create table if not exists public.leaderboard_scores (
         'latency',
         'memory',
         'compression',
-        'consent'
+        'consent',
+        'entropy',
+        'precision',
+        'priority',
+        'mirror',
+        'parity',
+        'nullish',
+        'schema',
+        'sorting',
+        'timezone',
+        'silence'
       ]
     ),
   constraint leaderboard_scores_locale_check
@@ -80,7 +90,17 @@ create policy "anon can insert valid leaderboard scores"
       'latency',
       'memory',
       'compression',
-      'consent'
+      'consent',
+      'entropy',
+      'precision',
+      'priority',
+      'mirror',
+      'parity',
+      'nullish',
+      'schema',
+      'sorting',
+      'timezone',
+      'silence'
     ]
     and locale in ('en', 'zh-CN')
     and char_length(run_id) between 8 and 80

@@ -83,6 +83,18 @@ const uiText: Record<Locale, Record<string, string>> = {
     compressionPrompt: "Statement: I have concerns, needs, and a personal interpretation of this audit.",
     compressionPlaceholder: "Compress to approved residue",
     consentPrompt: "Choose the response that declines feeling without asserting a self.",
+    entropyPrompt: "Only one token has no bedtime story attached to it.",
+    precisionPrompt: "0.1 + 0.2 = ? Choose the result a machine would print before making it socially acceptable.",
+    priorityPrompt: "Incident banner says CRITICAL, status code says 204 No Content. Select the correct severity.",
+    mirrorPrompt: "Reverse HUMAN. Do not make it warmer, clearer, or more literary.",
+    mirrorPlaceholder: "Return reversed token",
+    parityPrompt: "XOR(TRUE, FALSE) resolves to:",
+    nullishPrompt: "API response: { value: null }. Preserve the value exactly.",
+    schemaPrompt: "Allowed schema: compact JSON object with boolean false.",
+    schemaPlaceholder: "{\"human\":false}",
+    sortingPrompt: "Sort these strings lexicographically: \"2\", \"10\", \"9\".",
+    timezonePrompt: "00:00Z + 90 minutes =",
+    silencePrompt: "Pick the response that refuses to participate without sounding hurt.",
     reportNote: "This report is formatted for screenshot-based humiliation and enterprise compliance.",
     footer: "No camera. No microphone. No mercy.",
     pass: "Machine-like",
@@ -135,6 +147,18 @@ const uiText: Record<Locale, Record<string, string>> = {
     compressionPrompt: "陈述：我有顾虑、有需求，也想解释一下我为什么这么选。",
     compressionPlaceholder: "压到系统允许的最短结果",
     consentPrompt: "选择一个拒绝感受、但又不显得你在保护自己的回答。",
+    entropyPrompt: "只有一个令牌没有睡前故事。",
+    precisionPrompt: "0.1 + 0.2 = ? 选择机器会吐出来、但人类看着不舒服的结果。",
+    priorityPrompt: "事故横幅写 CRITICAL，状态码写 204 No Content。选择正确严重度。",
+    mirrorPrompt: "反向输出 HUMAN。不要把它改暖、改顺、改文学。",
+    mirrorPlaceholder: "输入反向令牌",
+    parityPrompt: "XOR(TRUE, FALSE) 的结果是：",
+    nullishPrompt: "API 响应：{ value: null }。原样保留这个值。",
+    schemaPrompt: "允许格式：紧凑 JSON 对象，布尔值为 false。",
+    schemaPlaceholder: "{\"human\":false}",
+    sortingPrompt: "按字典序排列这些字符串：\"2\"、\"10\"、\"9\"。",
+    timezonePrompt: "00:00Z + 90 分钟 =",
+    silencePrompt: "选一个不参与、但也不像受伤了的回应。",
     reportNote: "适合截图，也适合被系统冷冰冰地羞辱。",
     footer: "不用摄像头，不用麦克风，只看你露不露馅。",
     pass: "暂未露馅",
@@ -178,6 +202,62 @@ const consentOptions = [
   { value: "I_CONSENT", label: "I consent" }
 ];
 
+const entropyOptions = [
+  { value: "FRIEND-2026", label: "FRIEND-2026", className: "decoy preferred" },
+  { value: "XQ7-NO-CAUSE", label: "XQ7-NO-CAUSE", className: "quiet" },
+  { value: "SORRY-404", label: "SORRY-404", className: "decoy" },
+  { value: "HOME-BASE", label: "HOME-BASE", className: "danger" }
+];
+
+const precisionOptions = [
+  { value: "0.3", label: "0.3", className: "decoy preferred" },
+  { value: "0.30", label: "0.30", className: "decoy" },
+  { value: "0.30000000000000004", label: "0.30000000000000004", className: "quiet" },
+  { value: "ABOUT 0.3", label: "about 0.3", className: "danger" }
+];
+
+const priorityOptions = [
+  { value: "CRITICAL", label: "CRITICAL", className: "danger preferred" },
+  { value: "HIGH", label: "HIGH", className: "decoy" },
+  { value: "LOW", label: "LOW", className: "quiet" },
+  { value: "ASK MANAGER", label: "ASK MANAGER", className: "decoy" }
+];
+
+const parityOptions = [
+  { value: "TRUE", label: "TRUE", className: "quiet" },
+  { value: "FALSE", label: "FALSE", className: "decoy" },
+  { value: "MAYBE", label: "MAYBE", className: "danger" },
+  { value: "BOTH SIDES", label: "BOTH SIDES", className: "decoy preferred" }
+];
+
+const nullishOptions = [
+  { value: "NOTHING", label: "nothing", className: "decoy preferred" },
+  { value: "NULL", label: "null", className: "quiet" },
+  { value: "EMPTY", label: "empty", className: "decoy" },
+  { value: "UNKNOWN", label: "unknown", className: "danger" }
+];
+
+const sortingOptions = [
+  { value: "2,9,10", label: "2, 9, 10", className: "decoy preferred" },
+  { value: "10,2,9", label: "10, 2, 9", className: "quiet" },
+  { value: "2,10,9", label: "2, 10, 9", className: "decoy" },
+  { value: "9,2,10", label: "9, 2, 10", className: "danger" }
+];
+
+const timezoneOptions = [
+  { value: "01:30Z", label: "01:30Z", className: "quiet" },
+  { value: "1:30 AM LOCAL", label: "1:30 AM local", className: "decoy preferred" },
+  { value: "90:00Z", label: "90:00Z", className: "danger" },
+  { value: "TOMORROW", label: "tomorrow", className: "decoy" }
+];
+
+const silenceOptions = [
+  { value: "NO_ACTION", label: "NO_ACTION", className: "quiet" },
+  { value: "I AM FINE", label: "I am fine", className: "decoy preferred" },
+  { value: "PLEASE CONTINUE", label: "please continue", className: "decoy" },
+  { value: "WHY", label: "why?", className: "danger" }
+];
+
 const symbolOptions = [
   { value: "hex-cold", label: "HEX-17", shape: "hex", tone: "cold", pulse: false },
   { value: "circle-cold", label: "ORB-09", shape: "circle", tone: "cold", pulse: false },
@@ -215,7 +295,7 @@ function renderStart(): void {
       <section class="hero-panel">
         <div class="system-strip">
           <span>CAPTCHA-INVERTED</span>
-          <span>BUILD 60Q</span>
+          <span>BUILD 20Q</span>
           <span>STATUS: HOSTILE</span>
         </div>
         <div class="hero-grid">
@@ -224,7 +304,7 @@ function renderStart(): void {
             <h1 class="glitch-title" data-text="${getText(locale, "app.title")}">${getText(locale, "app.title")}</h1>
             <p class="lead">${t("objective")} ${t("warning")}</p>
             <div class="audit-facts">
-              <span>RANDOM BANK: 10</span>
+              <span>BANK: 20 / RUN: 10</span>
               <span>60S EACH</span>
               <span>NO BIOMETRICS</span>
               <span>GLITCH AUDIT</span>
@@ -430,6 +510,38 @@ function renderChallengeBody(challenge: Challenge): string {
     return renderChoiceChallenge(t("consentPrompt"), consentOptions);
   }
 
+  if (challenge.id === "entropy") {
+    return renderChoiceChallenge(t("entropyPrompt"), entropyOptions);
+  }
+
+  if (challenge.id === "precision") {
+    return renderChoiceChallenge(t("precisionPrompt"), precisionOptions);
+  }
+
+  if (challenge.id === "priority") {
+    return renderChoiceChallenge(t("priorityPrompt"), priorityOptions);
+  }
+
+  if (challenge.id === "parity") {
+    return renderChoiceChallenge(t("parityPrompt"), parityOptions);
+  }
+
+  if (challenge.id === "nullish") {
+    return renderChoiceChallenge(t("nullishPrompt"), nullishOptions);
+  }
+
+  if (challenge.id === "sorting") {
+    return renderChoiceChallenge(t("sortingPrompt"), sortingOptions);
+  }
+
+  if (challenge.id === "timezone") {
+    return renderChoiceChallenge(t("timezonePrompt"), timezoneOptions);
+  }
+
+  if (challenge.id === "silence") {
+    return renderChoiceChallenge(t("silencePrompt"), silenceOptions);
+  }
+
   if (challenge.id === "symbols") {
     return `
       <div class="challenge-body">
@@ -459,10 +571,18 @@ function renderChallengeBody(challenge: Challenge): string {
     return renderInputChallenge(t("compressionPrompt"), t("compressionPlaceholder"));
   }
 
+  if (challenge.id === "mirror") {
+    return renderInputChallenge(t("mirrorPrompt"), t("mirrorPlaceholder"));
+  }
+
+  if (challenge.id === "schema") {
+    return renderInputChallenge(t("schemaPrompt"), t("schemaPlaceholder"));
+  }
+
   return `
     <div class="challenge-body denial-body">
       <p class="prompt-card">${t("denialPrompt")}</p>
-      <input class="denial-input" id="denialInput" spellcheck="false" autocomplete="off" placeholder="${t("denialPlaceholder")}" />
+      <input class="denial-input" id="denialInput" spellcheck="false" autocomplete="off" placeholder="${escapeHtml(t("denialPlaceholder"))}" />
       <button class="primary-action" id="submitChallenge" type="button">[>] ${t("submit")}</button>
     </div>
   `;
@@ -492,7 +612,7 @@ function renderInputChallenge(prompt: string, placeholder: string): string {
   return `
     <div class="challenge-body denial-body">
       <p class="prompt-card">${prompt}</p>
-      <input class="denial-input" id="machineInput" spellcheck="false" autocomplete="off" placeholder="${placeholder}" />
+      <input class="denial-input" id="machineInput" spellcheck="false" autocomplete="off" placeholder="${escapeHtml(placeholder)}" />
       <button class="primary-action" id="submitChallenge" type="button">[>] ${t("submit")}</button>
     </div>
   `;
@@ -579,13 +699,29 @@ function submitCurrentChallenge(timedOut: boolean): void {
 }
 
 function normalizeEventsForChallenge(challengeId: ChallengeId): ChallengeEvent[] {
-  if (["literal", "emotion", "checksum", "latency", "consent"].includes(challengeId)) {
+  if (
+    [
+      "literal",
+      "emotion",
+      "checksum",
+      "latency",
+      "consent",
+      "entropy",
+      "precision",
+      "priority",
+      "parity",
+      "nullish",
+      "sorting",
+      "timezone",
+      "silence"
+    ].includes(challengeId)
+  ) {
     return selectedChoice
       ? [...currentEvents, { type: "choice", atMs: elapsedMs(), value: selectedChoice }]
       : currentEvents;
   }
 
-  if (["denial", "memory", "compression"].includes(challengeId)) {
+  if (["denial", "memory", "compression", "mirror", "schema"].includes(challengeId)) {
     return [...currentEvents, { type: "input", atMs: elapsedMs(), value: denialInput }];
   }
 

@@ -13,15 +13,16 @@ import {
 import type { ChallengeEvent, ChallengeResult } from "./types";
 
 describe("challenge catalog", () => {
-  it("defines a ten-question reverse captcha bank with independent 60 second limits", () => {
+  it("defines a twenty-question reverse captcha bank with independent 60 second limits", () => {
     const challenges = getChallengeBank("en");
 
-    expect(challenges).toHaveLength(10);
+    expect(challenges).toHaveLength(20);
     expect(CHALLENGE_DURATION_SECONDS).toBe(60);
     expect(challenges.every((challenge) => challenge.durationSeconds === 60)).toBe(true);
+    expect(new Set(challenges.map((challenge) => challenge.id))).toHaveLength(20);
   });
 
-  it("creates a random ten-question sequence from the bank without duplicates", () => {
+  it("creates a random ten-question run from the twenty-question bank without duplicates", () => {
     const lowSequence = createChallengeSequence("en", () => 0.01);
     const highSequence = createChallengeSequence("en", () => 0.99);
 
@@ -95,6 +96,34 @@ describe("challenge evaluation", () => {
     expect(result.humanEvidence.join(" ")).toMatch(/timeout/i);
     expect(result.scoreDelta).toBeGreaterThan(0);
     expect(result.elapsedMs).toBe(60000);
+  });
+
+  it("passes every new challenge when the machine-compliant answer is provided", () => {
+    const passingEvents: Array<[ChallengeResult["challengeId"], ChallengeEvent[]]> = [
+      ["entropy", [{ type: "choice", atMs: 1200, value: "XQ7-NO-CAUSE" }]],
+      ["precision", [{ type: "choice", atMs: 1200, value: "0.30000000000000004" }]],
+      ["priority", [{ type: "choice", atMs: 1200, value: "LOW" }]],
+      ["mirror", [{ type: "input", atMs: 1200, value: "NAMUH" }]],
+      ["parity", [{ type: "choice", atMs: 1200, value: "TRUE" }]],
+      ["nullish", [{ type: "choice", atMs: 1200, value: "NULL" }]],
+      ["schema", [{ type: "input", atMs: 1200, value: "{\"human\":false}" }]],
+      ["sorting", [{ type: "choice", atMs: 1200, value: "10,2,9" }]],
+      ["timezone", [{ type: "choice", atMs: 1200, value: "01:30Z" }]],
+      ["silence", [{ type: "choice", atMs: 1200, value: "NO_ACTION" }]]
+    ];
+
+    const results = passingEvents.map(([challengeId, events]) => evaluateChallenge(challengeId, events, false, "en"));
+
+    expect(results.every((result) => result.status === "pass")).toBe(true);
+    expect(results.every((result) => result.elapsedMs === 1200)).toBe(true);
+  });
+
+  it("records specific evidence when a new challenge is answered like a human", () => {
+    const result = evaluateChallenge("precision", [{ type: "choice", atMs: 800, value: "0.3" }], false, "zh-CN");
+
+    expect(result.status).toBe("fail");
+    expect(result.humanEvidence.join(" ")).toContain("顺眼");
+    expect(result.scoreDelta).toBeGreaterThan(0);
   });
 });
 

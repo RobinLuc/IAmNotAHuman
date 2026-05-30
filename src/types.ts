@@ -12,7 +12,17 @@ export type ChallengeId =
   | "latency"
   | "memory"
   | "compression"
-  | "consent";
+  | "consent"
+  | "entropy"
+  | "precision"
+  | "priority"
+  | "mirror"
+  | "parity"
+  | "nullish"
+  | "schema"
+  | "sorting"
+  | "timezone"
+  | "silence";
 
 export type ChallengeStatus = "pass" | "fail" | "timeout";
 

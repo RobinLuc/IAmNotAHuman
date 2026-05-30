@@ -377,6 +377,8 @@ button {
   font-weight: 900;
   font-size: clamp(18px, 3vw, 32px);
   text-align: left;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 .choice-card.preferred {
