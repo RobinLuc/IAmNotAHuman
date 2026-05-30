@@ -36,6 +36,8 @@ The test suite covers challenge catalog size, 10-question run selection, per-que
 
 The leaderboard is optional. Without Supabase environment variables, the report page shows an explanatory unconfigured state and the local game still works.
 
+### Dashboard Path
+
 1. Create a Supabase project.
 2. Run `supabase/leaderboard_scores.sql` in the Supabase SQL editor.
 3. Copy `.env.example` to `.env.local`.
@@ -47,6 +49,23 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 5. Restart the dev server.
+
+### CLI Path
+
+The Supabase CLI is installed as a project dev dependency. After creating a Supabase project and logging in:
+
+```bash
+npx supabase login
+npm run supabase:link -- --project-ref your-project-ref
+npm run supabase:push
+```
+
+Then copy the public Project URL and anon key into `.env.local`:
+
+```bash
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
 
 The table stores only score summaries: nickname, human probability, elapsed time, challenge count, challenge IDs, locale, timestamp, and run ID. It does not store raw click/input logs.
 
