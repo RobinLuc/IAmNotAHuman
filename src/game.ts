@@ -213,7 +213,10 @@ function evaluateSymbols(rawEvents: ChallengeEvent[], locale: Locale): Challenge
 }
 
 function evaluateDenial(rawEvents: ChallengeEvent[], locale: Locale): ChallengeResult {
-  const input = rawEvents.findLast((event) => event.type === "input")?.value?.trim() ?? "";
+  const input = [...rawEvents]
+    .reverse()
+    .find((event) => event.type === "input")
+    ?.value?.trim() ?? "";
   const passed = input === "I_DENY:DOUBT,FATIGUE,CONTEXT,INTERPRETATION";
 
   return {
