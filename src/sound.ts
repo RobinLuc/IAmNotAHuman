@@ -14,43 +14,43 @@ export interface SoundNote {
 
 const soundCues: Record<SoundCue, SoundNote[]> = {
   start: [
-    { frequency: 196, durationMs: 70, delayMs: 0, type: "square", gain: 0.016 },
-    { frequency: 294, durationMs: 70, delayMs: 70, type: "square", gain: 0.016 },
-    { frequency: 392, durationMs: 110, delayMs: 140, type: "sawtooth", gain: 0.014 }
+    { frequency: 196, durationMs: 70, delayMs: 0, type: "square", gain: 0.046 },
+    { frequency: 294, durationMs: 70, delayMs: 70, type: "square", gain: 0.044 },
+    { frequency: 392, durationMs: 110, delayMs: 140, type: "sawtooth", gain: 0.038 }
   ],
   tap: [
-    { frequency: 520, durationMs: 28, delayMs: 0, type: "square", gain: 0.012 },
-    { frequency: 760, durationMs: 22, delayMs: 30, type: "square", gain: 0.009 }
+    { frequency: 520, durationMs: 28, delayMs: 0, type: "square", gain: 0.032 },
+    { frequency: 760, durationMs: 22, delayMs: 30, type: "square", gain: 0.026 }
   ],
   select: [
-    { frequency: 360, durationMs: 45, delayMs: 0, type: "triangle", gain: 0.013 },
-    { frequency: 245, durationMs: 35, delayMs: 48, type: "sawtooth", gain: 0.009 }
+    { frequency: 360, durationMs: 45, delayMs: 0, type: "triangle", gain: 0.035 },
+    { frequency: 245, durationMs: 35, delayMs: 48, type: "sawtooth", gain: 0.024 }
   ],
   symbol: [
-    { frequency: 280, durationMs: 35, delayMs: 0, type: "triangle", gain: 0.012 },
-    { frequency: 430, durationMs: 45, delayMs: 38, type: "triangle", gain: 0.011 }
+    { frequency: 280, durationMs: 35, delayMs: 0, type: "triangle", gain: 0.032 },
+    { frequency: 430, durationMs: 45, delayMs: 38, type: "triangle", gain: 0.03 }
   ],
   type: [
-    { frequency: 700, durationMs: 16, delayMs: 0, type: "square", gain: 0.006 },
-    { frequency: 520, durationMs: 14, delayMs: 18, type: "square", gain: 0.004 }
+    { frequency: 700, durationMs: 16, delayMs: 0, type: "square", gain: 0.022 },
+    { frequency: 520, durationMs: 14, delayMs: 18, type: "square", gain: 0.018 }
   ],
   pass: [
-    { frequency: 520, durationMs: 65, delayMs: 0, type: "triangle", gain: 0.014 },
-    { frequency: 780, durationMs: 75, delayMs: 68, type: "triangle", gain: 0.014 },
-    { frequency: 1040, durationMs: 110, delayMs: 146, type: "square", gain: 0.011 }
+    { frequency: 520, durationMs: 65, delayMs: 0, type: "triangle", gain: 0.04 },
+    { frequency: 780, durationMs: 75, delayMs: 68, type: "triangle", gain: 0.043 },
+    { frequency: 1040, durationMs: 110, delayMs: 146, type: "square", gain: 0.036 }
   ],
   fail: [
-    { frequency: 180, durationMs: 90, delayMs: 0, type: "sawtooth", gain: 0.014 },
-    { frequency: 118, durationMs: 140, delayMs: 86, type: "square", gain: 0.012 }
+    { frequency: 180, durationMs: 90, delayMs: 0, type: "sawtooth", gain: 0.045 },
+    { frequency: 118, durationMs: 140, delayMs: 86, type: "square", gain: 0.035 }
   ],
   timeout: [
-    { frequency: 110, durationMs: 130, delayMs: 0, type: "sawtooth", gain: 0.013 },
-    { frequency: 76, durationMs: 210, delayMs: 132, type: "square", gain: 0.01 }
+    { frequency: 110, durationMs: 130, delayMs: 0, type: "sawtooth", gain: 0.04 },
+    { frequency: 76, durationMs: 210, delayMs: 132, type: "square", gain: 0.032 }
   ],
   leaderboard: [
-    { frequency: 420, durationMs: 50, delayMs: 0, type: "triangle", gain: 0.012 },
-    { frequency: 560, durationMs: 50, delayMs: 55, type: "triangle", gain: 0.012 },
-    { frequency: 720, durationMs: 90, delayMs: 112, type: "triangle", gain: 0.01 }
+    { frequency: 420, durationMs: 50, delayMs: 0, type: "triangle", gain: 0.034 },
+    { frequency: 560, durationMs: 50, delayMs: 55, type: "triangle", gain: 0.036 },
+    { frequency: 720, durationMs: 90, delayMs: 112, type: "triangle", gain: 0.032 }
   ]
 };
 
@@ -67,26 +67,30 @@ export function createSoundPlayer(): SoundPlayer {
 
   return {
     play(cue: SoundCue) {
-      try {
-        const AudioContextCtor =
-          window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-
-        if (!AudioContextCtor) return;
-
-        audioContext ??= new AudioContextCtor();
-
-        if (audioContext.state === "suspended") {
-          void audioContext.resume();
-        }
-
-        for (const note of getSoundCueNotes(cue)) {
-          playNote(audioContext, note);
-        }
-      } catch {
-        // Audio feedback is decorative and must never block input.
-      }
+      void playCue(cue);
     }
   };
+
+  async function playCue(cue: SoundCue): Promise<void> {
+    try {
+      const AudioContextCtor =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+      if (!AudioContextCtor) return;
+
+      audioContext ??= new AudioContextCtor();
+
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
+      }
+
+      for (const note of getSoundCueNotes(cue)) {
+        playNote(audioContext, note);
+      }
+    } catch {
+      // Audio feedback is decorative and must never block input.
+    }
+  }
 }
 
 function playNote(audioContext: AudioContext, note: SoundNote): void {
