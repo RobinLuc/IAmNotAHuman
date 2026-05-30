@@ -117,10 +117,25 @@ describe("score report", () => {
 
     const report = createScoreReport(results, "en");
 
-    expect(report.humanProbability).toBe(77);
+    expect(report.humanProbability).toBe(57);
     expect(report.verdict).toMatch(/human/i);
     expect(report.evidence[0]).toContain("Tap variance");
     expect(report.challengeResults).toHaveLength(2);
+  });
+
+  it("keeps a failed five-question run below the hard 99 percent cap", () => {
+    const results: ChallengeResult[] = Array.from({ length: 5 }, (_, index) => ({
+      challengeId: ["rhythm", "literal", "emotion", "symbols", "denial"][index] as ChallengeResult["challengeId"],
+      status: "fail",
+      humanEvidence: [`Failure ${index + 1}`],
+      scoreDelta: 30,
+      rawEvents: []
+    }));
+
+    const report = createScoreReport(results, "en");
+
+    expect(report.humanProbability).toBe(92);
+    expect(report.humanProbability).toBeLessThan(99);
   });
 });
 
