@@ -137,6 +137,17 @@ button {
   line-height: 1.45;
 }
 
+.hero-subtitle {
+  max-width: 760px;
+  margin: 10px 0 18px;
+  color: #f8f5ef;
+  font-size: clamp(24px, 3.6vw, 42px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: 0;
+  text-shadow: 1px 0 rgba(55, 245, 255, 0.38), -1px 0 rgba(255, 59, 95, 0.34);
+}
+
 .audit-facts,
 .hero-actions,
 .challenge-header,
@@ -762,16 +773,24 @@ footer {
 
 @media (max-width: 560px) {
   .shell {
-    width: min(100vw - 16px, 420px);
-    padding: 6px 0 calc(92px + env(safe-area-inset-bottom));
+    width: min(100vw - 24px, 390px);
+    padding: 4px 0 calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .report-shell {
+    align-items: flex-start;
   }
 
   .system-strip,
+  .rhythm-body {
+    grid-template-columns: 1fr;
+  }
+
   .choice-grid,
   .symbol-grid,
-  .rhythm-body,
   .report-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .system-strip span {
@@ -781,6 +800,11 @@ footer {
 
   .hero-grid {
     padding: 20px;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(22px, 6.4vw, 30px);
+    margin: 8px 0 16px;
   }
 
   .seal-card {
@@ -798,15 +822,34 @@ footer {
   }
 
   .page-title {
-    font-size: clamp(36px, 14vw, 52px);
+    font-size: clamp(30px, 11vw, 42px);
   }
 
   .side-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .metric {
+    padding: 8px;
+  }
+
+  .metric strong {
+    font-size: 20px;
+  }
+
+  .risk-tag {
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .log-panel {
+    display: none;
   }
 
   .challenge-panel {
-    padding: 14px;
+    padding: 12px;
   }
 
   .challenge-header {
@@ -817,7 +860,7 @@ footer {
   }
 
   .challenge-header h2 {
-    font-size: clamp(30px, 11vw, 48px);
+    font-size: clamp(26px, 9.5vw, 38px);
   }
 
   .status-pill {
@@ -827,12 +870,14 @@ footer {
   }
 
   .instruction {
+    font-size: 16px;
+    line-height: 1.35;
     margin: 0 0 12px;
   }
 
   .challenge-body {
-    gap: 12px;
-    padding-bottom: 88px;
+    gap: 10px;
+    padding-bottom: 82px;
   }
 
   .challenge-body > .primary-action {
@@ -845,18 +890,129 @@ footer {
   }
 
   .prompt-card {
-    padding: 12px;
+    padding: 10px;
+    font-size: 15px;
+    line-height: 1.4;
   }
 
   .choice-card {
-    min-height: 72px;
+    min-height: 62px;
+    padding: 10px;
+    font-size: clamp(15px, 4.6vw, 20px);
+  }
+
+  .symbol-card {
+    min-height: 104px;
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .symbol-shape {
+    width: 42px;
+    height: 42px;
   }
 
   .pulse-pad {
-    min-height: 220px;
+    min-height: 170px;
+    font-size: clamp(26px, 10vw, 44px);
+  }
+
+  .report-panel {
+    padding: 14px;
+  }
+
+  .report-header {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: 12px;
+  }
+
+  .report-header .glitch-title {
+    font-size: clamp(42px, 16vw, 64px);
+  }
+
+  .report-header .lead {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.35;
   }
 
   .probability-ring {
-    width: 190px;
+    width: 108px;
+    border-width: 1px;
+  }
+
+  .probability-ring strong {
+    font-size: 28px;
+  }
+
+  .probability-ring span {
+    font-size: 12px;
+  }
+
+  .report-grid {
+    margin: 14px 0;
+  }
+
+  .result-card {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .result-top {
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .result-card h3 {
+    min-height: 0;
+    margin: 10px 0 6px;
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .result-card p {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .evidence-panel,
+  .leaderboard-panel {
+    padding: 12px;
+  }
+
+  .evidence-panel h2,
+  .leaderboard-header h2 {
+    font-size: 26px;
+  }
+
+  .evidence-panel ul {
+    margin: 10px 0;
+    padding-left: 18px;
+  }
+
+  .leaderboard-submit button {
+    width: 100%;
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 4px 8px;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .leaderboard-row .rank {
+    grid-row: 1 / span 4;
+  }
+
+  .leaderboard-row span,
+  .leaderboard-row time {
+    font-size: 12px;
   }
 }

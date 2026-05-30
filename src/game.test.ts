@@ -28,9 +28,20 @@ describe("challenge catalog", () => {
 
     expect(lowSequence).toHaveLength(10);
     expect(new Set(lowSequence.map((challenge) => challenge.id))).toHaveLength(10);
+    expect(lowSequence.map((challenge) => challenge.id)).toContain("rhythm");
     expect(highSequence).toHaveLength(10);
     expect(new Set(highSequence.map((challenge) => challenge.id))).toHaveLength(10);
+    expect(highSequence.map((challenge) => challenge.id)).toContain("rhythm");
     expect(lowSequence.map((challenge) => challenge.id)).not.toEqual(highSequence.map((challenge) => challenge.id));
+  });
+
+  it("varies the rhythm tap count for each new run", () => {
+    const lowState = createInitialGameState("zh-CN", () => 0.01);
+    const highState = createInitialGameState("zh-CN", () => 0.99);
+
+    expect(lowState.rhythmTargetCount).toBe(4);
+    expect(highState.rhythmTargetCount).toBe(7);
+    expect(lowState.rhythmTargetCount).not.toBe(highState.rhythmTargetCount);
   });
 });
 
@@ -87,6 +98,14 @@ describe("challenge evaluation", () => {
     expect(result.humanEvidence.join(" ")).toMatch(/variance/i);
     expect(result.scoreDelta).toBeGreaterThan(0);
     expect(result.elapsedMs).toBe(2390);
+  });
+
+  it("checks rhythm against the target tap count for the run", () => {
+    const sixTaps: ChallengeEvent[] = [0, 800, 1600, 2400, 3200, 4000].map((atMs) => ({ type: "tap", atMs }));
+    const fiveTaps: ChallengeEvent[] = sixTaps.slice(0, 5);
+
+    expect(evaluateChallenge("rhythm", sixTaps, false, "zh-CN", { rhythmTargetCount: 6 }).status).toBe("pass");
+    expect(evaluateChallenge("rhythm", fiveTaps, false, "zh-CN", { rhythmTargetCount: 6 }).status).toBe("fail");
   });
 
   it("records timeout evidence without blocking later questions", () => {

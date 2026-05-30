@@ -40,6 +40,7 @@ const appRoot = app;
 const uiText: Record<Locale, Record<string, string>> = {
   en: {
     startTitle: "I Am Not A Human",
+    startSubtitle: "",
     startLead: "Objective: prove the applicant is not human. Human convenience features are disabled.",
     start: "Start audit",
     restart: "Re-run audit",
@@ -108,7 +109,8 @@ const uiText: Record<Locale, Record<string, string>> = {
     timeout: "Organic timeout"
   },
   "zh-CN": {
-    startTitle: "机人验证：证明你不是人类！",
+    startTitle: "机人验证",
+    startSubtitle: "证明你不是人类！",
     startLead: "",
     start: "开始审查",
     restart: "再审一次",
@@ -303,6 +305,7 @@ function renderStart(): void {
   gameState = null;
   currentEvents = [];
   const startLead = t("startLead");
+  const startSubtitle = t("startSubtitle");
   const startTitle = t("startTitle");
   appRoot.innerHTML = `
     <main class="shell start-shell">
@@ -316,6 +319,7 @@ function renderStart(): void {
           <div class="hero-copy">
             <p class="eyebrow">Reverse Human Verification</p>
             <h1 class="glitch-title" data-text="${startTitle}">${startTitle}</h1>
+            ${startSubtitle ? `<p class="hero-subtitle">${startSubtitle}</p>` : ""}
             ${startLead ? `<p class="lead">${startLead}</p>` : ""}
             <div class="audit-facts">
               <span>BANK: 20 / RUN: 10</span>
@@ -404,7 +408,7 @@ function stopTimer(): void {
 
 function renderChallenge(): void {
   if (!gameState) return;
-  const catalog = getChallengeCatalog(locale, gameState.challengeIds);
+  const catalog = getChallengeCatalog(locale, gameState.challengeIds, gameState.rhythmTargetCount);
   const challenge = catalog[gameState.currentChallengeIndex];
   const progress = ((gameState.currentChallengeIndex + 1) / catalog.length) * 100;
 
@@ -462,11 +466,12 @@ function renderChallenge(): void {
 
 function renderChallengeBody(challenge: Challenge): string {
   if (challenge.id === "rhythm") {
+    const targetTapCount = challenge.targetTapCount ?? 5;
     return `
       <div class="challenge-body rhythm-body">
         <button class="pulse-pad" id="rhythmTap" type="button">
           <span>${t("rhythmAction")}</span>
-          <b id="tapCount">0/5</b>
+          <b id="tapCount">0/${targetTapCount}</b>
         </button>
         <button class="primary-action" id="submitChallenge" type="button">[>] ${t("rhythmSubmit")}</button>
       </div>
@@ -635,11 +640,12 @@ function renderInputChallenge(prompt: string, placeholder: string): string {
 
 function wireChallenge(challenge: Challenge): void {
   if (challenge.id === "rhythm") {
+    const targetTapCount = challenge.targetTapCount ?? 5;
     document.querySelector("#rhythmTap")?.addEventListener("click", () => {
       recordEvent({ type: "tap", atMs: elapsedMs() });
       const taps = currentEvents.filter((event) => event.type === "tap").length;
       const tapCount = document.querySelector("#tapCount");
-      if (tapCount) tapCount.textContent = `${Math.min(taps, 5)}/5`;
+      if (tapCount) tapCount.textContent = `${Math.min(taps, targetTapCount)}/${targetTapCount}`;
       soundPlayer.play("tap");
     });
   }
@@ -700,11 +706,15 @@ function rebuildSymbolEvents(): void {
 function submitCurrentChallenge(timedOut: boolean): void {
   if (!gameState || gameState.phase !== "running") return;
   stopTimer();
-  const challenge = getChallengeCatalog(locale, gameState.challengeIds)[gameState.currentChallengeIndex];
+  const challenge = getChallengeCatalog(locale, gameState.challengeIds, gameState.rhythmTargetCount)[
+    gameState.currentChallengeIndex
+  ];
   const normalizedEvents = normalizeEventsForChallenge(challenge.id);
   const submitEvent: ChallengeEvent = { type: "submit", atMs: elapsedMs(), value: challenge.id };
   const events = timedOut ? normalizedEvents : [...normalizedEvents, submitEvent];
-  const result = evaluateChallenge(challenge.id, events, timedOut, locale);
+  const result = evaluateChallenge(challenge.id, events, timedOut, locale, {
+    rhythmTargetCount: challenge.targetTapCount ?? gameState.rhythmTargetCount
+  });
   soundPlayer.play(result.status);
   gameState = recordChallengeResult(gameState, result);
 
@@ -772,7 +782,7 @@ function renderReport(): void {
               return `
                 <article class="result-card ${result.status}">
                   <div class="result-top">
-                    <span>0${index + 1}</span>
+                    <span>${String(index + 1).padStart(2, "0")}</span>
                     <b>${result.status === "pass" ? t("pass") : result.status === "timeout" ? t("timeout") : t("fail")}</b>
                   </div>
                   <h3>${challenge?.title ?? result.challengeId}</h3>

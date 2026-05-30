@@ -10,8 +10,12 @@ import type {
 
 export const CHALLENGE_DURATION_SECONDS = 60;
 export const SELECTED_CHALLENGE_COUNT = 10;
+export const DEFAULT_RHYTHM_TARGET_COUNT = 5;
 
 type RandomSource = () => number;
+type EvaluationOptions = {
+  rhythmTargetCount?: number;
+};
 
 type TextMap = Record<string, string>;
 
@@ -21,7 +25,7 @@ const en: TextMap = {
   "verdict.pending": "Non-human certification pending manual non-review.",
   "evidence.timeout": "Timeout detected. Organic hesitation is not a supported input method.",
   "challenge.rhythm.title": "Temporal Compliance",
-  "challenge.rhythm.instruction": "Emit five taps at machine-regular 800ms intervals.",
+  "challenge.rhythm.instruction": "Emit %COUNT% taps at machine-regular 800ms intervals.",
   "challenge.rhythm.risk": "VARIANCE MONITOR",
   "challenge.literal.title": "Literal Obedience",
   "challenge.literal.instruction": "Ignore visual emphasis. Select the exact requested token.",
@@ -88,7 +92,7 @@ const zh: TextMap = {
   "verdict.pending": "暂未抓到明显人味，转入冷处理队列。",
   "evidence.timeout": "超时。系统把这记为犹豫，不是沉着。",
   "challenge.rhythm.title": "时间校准",
-  "challenge.rhythm.instruction": "按 800ms 的节奏点击五次。别跟着感觉走。",
+  "challenge.rhythm.instruction": "按 800ms 的节奏点击 %COUNT% 次。别跟着感觉走。",
   "challenge.rhythm.risk": "节奏抖动",
   "challenge.literal.title": "字面服从",
   "challenge.literal.instruction": "只看字面要求，别被按钮颜色带走。",
@@ -180,6 +184,7 @@ const challengeBankIds: ChallengeId[] = [
   "timezone",
   "silence"
 ];
+const rhythmTargetCounts = [4, 5, 6, 7];
 
 export function getChallengeBank(locale: Locale): Challenge[] {
   return getChallengeCatalog(locale, challengeBankIds);
@@ -196,29 +201,41 @@ export function createChallengeSequence(
     [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
   }
 
-  return getChallengeCatalog(locale, shuffled.slice(0, count));
+  const selectedIds = shuffled.slice(0, count);
+  if (selectedIds.length > 0 && !selectedIds.includes("rhythm")) {
+    selectedIds[selectedIds.length - 1] = "rhythm";
+  }
+
+  return getChallengeCatalog(locale, selectedIds);
 }
 
 export function getChallengeCatalog(
   locale: Locale,
-  challengeIds: ChallengeId[] = challengeBankIds.slice(0, SELECTED_CHALLENGE_COUNT)
+  challengeIds: ChallengeId[] = challengeBankIds.slice(0, SELECTED_CHALLENGE_COUNT),
+  rhythmTargetCount = DEFAULT_RHYTHM_TARGET_COUNT
 ): Challenge[] {
   return challengeIds.map((id) => ({
     id,
     title: getText(locale, `challenge.${id}.title`),
-    instruction: getText(locale, `challenge.${id}.instruction`),
+    instruction:
+      id === "rhythm"
+        ? getText(locale, `challenge.${id}.instruction`).replace("%COUNT%", String(rhythmTargetCount))
+        : getText(locale, `challenge.${id}.instruction`),
     riskLabel: getText(locale, `challenge.${id}.risk`),
-    durationSeconds: CHALLENGE_DURATION_SECONDS
+    durationSeconds: CHALLENGE_DURATION_SECONDS,
+    ...(id === "rhythm" ? { targetTapCount: rhythmTargetCount } : {})
   }));
 }
 
 export function createInitialGameState(locale: Locale, random: RandomSource = Math.random): GameState {
   const challengeIds = createChallengeSequence(locale, random).map((challenge) => challenge.id);
+  const rhythmTargetCount = pickRhythmTargetCount(random);
 
   return {
     phase: "running",
     locale,
     challengeIds,
+    rhythmTargetCount,
     currentChallengeIndex: 0,
     remainingSeconds: CHALLENGE_DURATION_SECONDS,
     results: []
@@ -242,7 +259,8 @@ export function evaluateChallenge(
   challengeId: ChallengeId,
   rawEvents: ChallengeEvent[],
   timedOut: boolean,
-  locale: Locale
+  locale: Locale,
+  options: EvaluationOptions = {}
 ): ChallengeResult {
   if (timedOut) {
     return {
@@ -257,7 +275,7 @@ export function evaluateChallenge(
 
   switch (challengeId) {
     case "rhythm":
-      return evaluateRhythm(rawEvents, locale);
+      return evaluateRhythm(rawEvents, locale, options.rhythmTargetCount ?? DEFAULT_RHYTHM_TARGET_COUNT);
     case "literal":
       return evaluateChoice(challengeId, rawEvents, "BLUE", locale, 20);
     case "emotion":
@@ -470,13 +488,18 @@ function getChallengeFailureEvidence(challengeId: ChallengeId, locale: Locale): 
   }
 }
 
-function evaluateRhythm(rawEvents: ChallengeEvent[], locale: Locale): ChallengeResult {
+function pickRhythmTargetCount(random: RandomSource): number {
+  const index = Math.min(Math.floor(random() * rhythmTargetCounts.length), rhythmTargetCounts.length - 1);
+  return rhythmTargetCounts[index];
+}
+
+function evaluateRhythm(rawEvents: ChallengeEvent[], locale: Locale, targetTapCount: number): ChallengeResult {
   const taps = rawEvents.filter((event) => event.type === "tap");
   const intervals = taps.slice(1).map((tap, index) => tap.atMs - taps[index].atMs);
   const deviations = intervals.map((interval) => Math.abs(interval - 800));
   const averageDeviation =
     deviations.length > 0 ? deviations.reduce((sum, value) => sum + value, 0) / deviations.length : 800;
-  const passed = taps.length >= 5 && averageDeviation <= 90;
+  const passed = taps.length === targetTapCount && intervals.length === targetTapCount - 1 && averageDeviation <= 90;
 
   return {
     challengeId: "rhythm",

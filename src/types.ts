@@ -40,6 +40,7 @@ export interface Challenge {
   instruction: string;
   durationSeconds: number;
   riskLabel: string;
+  targetTapCount?: number;
 }
 
 export interface ChallengeResult {
@@ -55,6 +56,7 @@ export interface GameState {
   phase: GamePhase;
   locale: Locale;
   challengeIds: ChallengeId[];
+  rhythmTargetCount: number;
   currentChallengeIndex: number;
   remainingSeconds: number;
   results: ChallengeResult[];
