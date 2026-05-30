@@ -21,14 +21,14 @@ describe("challenge catalog", () => {
     expect(challenges.every((challenge) => challenge.durationSeconds === 60)).toBe(true);
   });
 
-  it("creates a random five-question sequence from the bank without duplicates", () => {
+  it("creates a random ten-question sequence from the bank without duplicates", () => {
     const lowSequence = createChallengeSequence("en", () => 0.01);
     const highSequence = createChallengeSequence("en", () => 0.99);
 
-    expect(lowSequence).toHaveLength(5);
-    expect(new Set(lowSequence.map((challenge) => challenge.id))).toHaveLength(5);
-    expect(highSequence).toHaveLength(5);
-    expect(new Set(highSequence.map((challenge) => challenge.id))).toHaveLength(5);
+    expect(lowSequence).toHaveLength(10);
+    expect(new Set(lowSequence.map((challenge) => challenge.id))).toHaveLength(10);
+    expect(highSequence).toHaveLength(10);
+    expect(new Set(highSequence.map((challenge) => challenge.id))).toHaveLength(10);
     expect(lowSequence.map((challenge) => challenge.id)).not.toEqual(highSequence.map((challenge) => challenge.id));
   });
 });
@@ -41,7 +41,7 @@ describe("game state", () => {
     expect(state.currentChallengeIndex).toBe(0);
     expect(state.remainingSeconds).toBe(60);
     expect(state.locale).toBe("zh-CN");
-    expect(state.challengeIds).toHaveLength(5);
+    expect(state.challengeIds).toHaveLength(10);
     expect(state.results).toEqual([]);
   });
 
@@ -57,7 +57,7 @@ describe("game state", () => {
     expect(nextState.results).toHaveLength(1);
   });
 
-  it("enters the report phase only after all five challenge results are recorded", () => {
+  it("enters the report phase only after all ten challenge results are recorded", () => {
     let state = createInitialGameState("en", () => 0.01);
 
     for (const challenge of getChallengeCatalog("en", state.challengeIds)) {
@@ -65,9 +65,9 @@ describe("game state", () => {
     }
 
     expect(state.phase).toBe("report");
-    expect(state.currentChallengeIndex).toBe(4);
+    expect(state.currentChallengeIndex).toBe(9);
     expect(state.remainingSeconds).toBe(0);
-    expect(state.results).toHaveLength(5);
+    expect(state.results).toHaveLength(10);
   });
 });
 
@@ -85,6 +85,7 @@ describe("challenge evaluation", () => {
     expect(result.status).toBe("fail");
     expect(result.humanEvidence.join(" ")).toMatch(/variance/i);
     expect(result.scoreDelta).toBeGreaterThan(0);
+    expect(result.elapsedMs).toBe(2390);
   });
 
   it("records timeout evidence without blocking later questions", () => {
@@ -93,6 +94,7 @@ describe("challenge evaluation", () => {
     expect(result.status).toBe("timeout");
     expect(result.humanEvidence.join(" ")).toMatch(/timeout/i);
     expect(result.scoreDelta).toBeGreaterThan(0);
+    expect(result.elapsedMs).toBe(60000);
   });
 });
 
@@ -104,6 +106,7 @@ describe("score report", () => {
         status: "fail",
         humanEvidence: ["Tap variance exceeded machine tolerance."],
         scoreDelta: 22,
+        elapsedMs: 1800,
         rawEvents: []
       },
       {
@@ -111,6 +114,7 @@ describe("score report", () => {
         status: "pass",
         humanEvidence: [],
         scoreDelta: 5,
+        elapsedMs: 900,
         rawEvents: []
       }
     ];
@@ -123,12 +127,14 @@ describe("score report", () => {
     expect(report.challengeResults).toHaveLength(2);
   });
 
-  it("keeps a failed five-question run below the hard 99 percent cap", () => {
-    const results: ChallengeResult[] = Array.from({ length: 5 }, (_, index) => ({
-      challengeId: ["rhythm", "literal", "emotion", "symbols", "denial"][index] as ChallengeResult["challengeId"],
+  it("keeps a failed ten-question run below the hard 99 percent cap", () => {
+    const ids = getChallengeBank("en").map((challenge) => challenge.id);
+    const results: ChallengeResult[] = Array.from({ length: 10 }, (_, index) => ({
+      challengeId: ids[index],
       status: "fail",
       humanEvidence: [`Failure ${index + 1}`],
       scoreDelta: 30,
+      elapsedMs: 60000,
       rawEvents: []
     }));
 

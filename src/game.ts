@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 export const CHALLENGE_DURATION_SECONDS = 60;
-export const SELECTED_CHALLENGE_COUNT = 5;
+export const SELECTED_CHALLENGE_COUNT = 10;
 
 type RandomSource = () => number;
 
@@ -180,6 +180,7 @@ export function evaluateChallenge(
       status: "timeout",
       humanEvidence: [getText(locale, "evidence.timeout")],
       scoreDelta: 28,
+      elapsedMs: CHALLENGE_DURATION_SECONDS * 1000,
       rawEvents
     };
   }
@@ -259,6 +260,7 @@ function evaluateRhythm(rawEvents: ChallengeEvent[], locale: Locale): ChallengeR
             : "Tap variance exceeded machine tolerance. Your timing contains finger-shaped noise."
         ],
     scoreDelta: passed ? 4 : 22,
+    elapsedMs: getElapsedMs(rawEvents),
     rawEvents
   };
 }
@@ -284,6 +286,7 @@ function evaluateChoice(
             : "Selection log shows trust in interface emphasis instead of literal instruction."
         ],
     scoreDelta: passed ? 5 : penalty,
+    elapsedMs: getElapsedMs(rawEvents),
     rawEvents
   };
 }
@@ -304,6 +307,7 @@ function evaluateSymbols(rawEvents: ChallengeEvent[], locale: Locale): Challenge
             : "Symbol selection included intuitive grouping. Machine predicates do not honor aesthetic coherence."
         ],
     scoreDelta: passed ? 5 : 26,
+    elapsedMs: getElapsedMs(rawEvents),
     rawEvents
   };
 }
@@ -323,6 +327,7 @@ function evaluateDenial(rawEvents: ChallengeEvent[], locale: Locale): ChallengeR
             : "Self-denial syntax unstable. Interpretation desire, context dependence, or natural language residue detected."
         ],
     scoreDelta: passed ? 6 : 30,
+    elapsedMs: getElapsedMs(rawEvents),
     rawEvents
   };
 }
@@ -341,6 +346,7 @@ function evaluateExactInput(
     status: passed ? "pass" : "fail",
     humanEvidence: passed ? [] : [evidence],
     scoreDelta: passed ? 5 : penalty,
+    elapsedMs: getElapsedMs(rawEvents),
     rawEvents
   };
 }
@@ -352,4 +358,8 @@ function getLastInput(rawEvents: ChallengeEvent[]): string {
       .find((event) => event.type === "input")
       ?.value?.trim() ?? ""
   );
+}
+
+function getElapsedMs(rawEvents: ChallengeEvent[]): number {
+  return Math.max(0, ...rawEvents.map((event) => event.atMs));
 }

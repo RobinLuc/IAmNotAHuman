@@ -242,6 +242,7 @@ button {
 .log-panel,
 .challenge-panel,
 .evidence-panel,
+.leaderboard-panel,
 .result-card {
   border: 1px solid rgba(248, 245, 239, 0.18);
   background: rgba(10, 10, 10, 0.86);
@@ -533,6 +534,142 @@ footer {
   color: #d8d4cb;
 }
 
+.leaderboard-panel {
+  margin-top: 18px;
+  padding: 18px;
+  background:
+    repeating-linear-gradient(90deg, rgba(55, 245, 255, 0.06) 0 1px, transparent 1px 18px),
+    rgba(10, 10, 10, 0.9);
+}
+
+.leaderboard-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  border-bottom: 1px solid rgba(248, 245, 239, 0.12);
+  padding-bottom: 14px;
+}
+
+.leaderboard-header h2 {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 44px);
+  line-height: 1;
+}
+
+.leaderboard-header p {
+  margin: 10px 0 0;
+  color: #d8d4cb;
+  line-height: 1.45;
+}
+
+.run-chip {
+  min-width: 150px;
+  border: 1px solid rgba(183, 255, 74, 0.34);
+  padding: 12px;
+  text-align: right;
+  background: rgba(183, 255, 74, 0.06);
+}
+
+.run-chip span {
+  display: block;
+  color: #9d988f;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.run-chip strong {
+  color: #b7ff4a;
+  font-size: 28px;
+}
+
+.leaderboard-submit {
+  display: grid;
+  grid-template-columns: auto minmax(160px, 260px) auto;
+  gap: 10px;
+  align-items: center;
+  margin: 16px 0 10px;
+}
+
+.leaderboard-submit label {
+  color: #9d988f;
+}
+
+.leaderboard-submit input {
+  min-height: 42px;
+  border: 1px solid rgba(248, 245, 239, 0.22);
+  border-radius: 6px;
+  background: #111;
+  color: #f8f5ef;
+  padding: 10px 12px;
+}
+
+.leaderboard-submit button:disabled,
+.leaderboard-submit input:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.leaderboard-message {
+  min-height: 22px;
+  margin: 0 0 12px;
+  color: #9d988f;
+}
+
+.leaderboard-message.submitted {
+  color: #b7ff4a;
+}
+
+.leaderboard-message.error,
+.leaderboard-message.unconfigured {
+  color: #ff9f3b;
+}
+
+.leaderboard-list {
+  display: grid;
+  gap: 8px;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 72px 120px 118px;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(248, 245, 239, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.leaderboard-row.current-run {
+  border-color: rgba(183, 255, 74, 0.5);
+  box-shadow: inset 4px 0 0 #b7ff4a;
+}
+
+.leaderboard-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.leaderboard-row span,
+.leaderboard-row time {
+  color: #d8d4cb;
+  font-size: 13px;
+}
+
+.leaderboard-row .rank {
+  color: #37f5ff;
+  font-weight: 900;
+}
+
+.empty-board {
+  margin: 0;
+  padding: 16px;
+  border: 1px dashed rgba(248, 245, 239, 0.18);
+  color: #8d887f;
+}
+
 @keyframes scan {
   to {
     transform: translateX(100%);
@@ -588,6 +725,16 @@ footer {
 
   .probability-ring {
     justify-self: start;
+  }
+
+  .leaderboard-header,
+  .leaderboard-submit,
+  .leaderboard-row {
+    grid-template-columns: 1fr;
+  }
+
+  .run-chip {
+    text-align: left;
   }
 }
 
